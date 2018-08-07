@@ -82,6 +82,7 @@
     <Compile Include="Engine\GameWindow.cs" />
     <Compile Include="Engine\MathHelper.cs" />
     <Compile Include="Engine\ObjectManager.cs" />
+    <Compile Include="Engine\Primitives2D.cs" />
     <Compile Include="Engine\ResourceManager.cs" />
     <Compile Include="Engine\Scene.cs" />
     <Compile Include="Engine\SceneManager.cs" />

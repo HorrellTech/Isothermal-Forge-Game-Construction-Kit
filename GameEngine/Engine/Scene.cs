@@ -15,5 +15,21 @@ namespace GameEngine.Engine
         {
 
         }
+
+        /// <summary>
+        /// Update all of the objects in the scene
+        /// </summary>
+        public void Update()
+        {
+            
+        }
+
+        /// <summary>
+        /// Draw all of the objects in the scene
+        /// </summary>
+        public void Draw()
+        {
+
+        }
     }
 }

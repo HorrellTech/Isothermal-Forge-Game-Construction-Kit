@@ -11,3 +11,16 @@ C:\Users\Syn\Desktop\Isothermal Forge Source\Editor\Editor\bin\Debug\DarkUI.dll
 C:\Users\Syn\Desktop\Isothermal Forge Source\Editor\Editor\bin\Debug\DarkUI.pdb
 C:\Users\Syn\Desktop\Isothermal Forge Source\Editor\Editor\obj\Debug\Editor.Form1.resources
 C:\Users\Syn\Desktop\Isothermal Forge Source\Editor\Editor\obj\Debug\Editor.csproj.CopyComplete
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\bin\Debug\Editor.exe.config
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\bin\Debug\Editor.exe
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\bin\Debug\Editor.pdb
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\bin\Debug\DarkUI.dll
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\bin\Debug\DarkUI.pdb
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.csprojAssemblyReference.cache
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.Form1.resources
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.Properties.Resources.resources
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.csproj.GenerateResource.cache
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.csproj.CoreCompileInputs.cache
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.csproj.CopyComplete
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.exe
+C:\Users\Syn\Desktop\Isothermal Forge Source\Isothermal-Forge-Game-Construction-Kit\Editor\obj\Debug\Editor.pdb

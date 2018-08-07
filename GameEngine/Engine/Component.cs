@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
-    class GameObject
+    class Component
     {
 
-
-        public GameObject()
+        public Component()
         {
 
         }

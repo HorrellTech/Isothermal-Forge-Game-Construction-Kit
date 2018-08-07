@@ -76,13 +76,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Engine\Drawer.cs" />
     <Compile Include="Engine\GameManager.cs" />
     <Compile Include="Engine\GameObject.cs" />
     <Compile Include="Engine\GameWindow.cs" />
     <Compile Include="Engine\MathHelper.cs" />
+    <Compile Include="Engine\ObjectManager.cs" />
+    <Compile Include="Engine\ResourceManager.cs" />
     <Compile Include="Engine\Scene.cs" />
     <Compile Include="Engine\SceneManager.cs" />
     <Compile Include="Engine\Sprite.cs" />
+    <Compile Include="Engine\Variables.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

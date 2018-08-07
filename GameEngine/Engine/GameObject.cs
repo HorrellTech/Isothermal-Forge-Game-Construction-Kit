@@ -208,6 +208,32 @@ namespace GameEngine.Engine
         }
 
         /// <summary>
+        /// Adds motion towards a set driection
+        /// 
+        /// REQUIRES UseBuiltInPhysics
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="speed"></param>
+        public void MotionAdd(float direction, float speed)
+        {
+            Speed += speed;
+            Direction = direction;
+        }
+
+        /// <summary>
+        /// Sets motion towards a direction
+        /// 
+        /// REQUIRES UseBuiltInPhysics
+        /// </summary>
+        /// <param name="direction"></param>
+        /// <param name="speed"></param>
+        public void MotionSet(float direction, float speed)
+        {
+            Direction = direction;
+            Speed = speed;
+        }
+
+        /// <summary>
         /// When we draw using the object
         /// </summary>
         public void Draw()

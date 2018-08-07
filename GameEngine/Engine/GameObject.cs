@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,8 +22,52 @@ namespace GameEngine.Engine
         public event UpdateEndEvent OnUpdateEnd;
         public event DrawEvent OnDraw;
 
-        public GameObject()
+        private GameManager manager;
+
+        public string Name = "object";
+
+        // Basic variables
+        public float X = 0;
+        public float Y = 0;
+        public float XStart = 0;
+        public float YStart = 0;
+        public float XPrevious = 0;
+        public float YPrevious = 0;
+
+        // Image stuff
+        public Sprite SpriteIndex = null;
+
+        public int ImageSingle = 0;
+        public float ImageIndex = 0;
+        public float ImageSpeed = 1.0f;
+        public float ImageAngle = 0;
+        public float ImageXScale = 1;
+        public float ImageYScale = 1;
+        public Color ImageBlend = Color.White;
+        public float ImageAlpha = 1.0f;
+
+        public float Direction = 0;
+        public float Speed = 0;
+        public float HSpeed = 0;
+        public float VSpeed = 0;
+
+        public float Gravity = 0;
+        public float GravityDirection = 270;
+        public float Friction = 0;
+
+        public bool Persistent = false;
+        public bool Active = true;
+        public bool Visible = true;
+
+        public int Depth = 0;
+
+        public long ID = 0; // The ID
+
+        private bool createEventRan = false;
+
+        public GameObject(GameManager manager)
         {
+            this.manager = manager;
         }
 
         /// <summary>
@@ -34,6 +79,7 @@ namespace GameEngine.Engine
             {
                 OnAwake();
             }
+            createEventRan = true;
         }
 
         /// <summary>
@@ -41,7 +87,19 @@ namespace GameEngine.Engine
         /// </summary>
         public void Update()
         {
-            if(OnUpdateBegin != null)
+            // Run the create event if it hasn't been run yet
+            if (!createEventRan)
+            {
+                XStart = X;
+                YStart = Y;
+                Awake();
+            }
+
+            // Store the previous position
+            XPrevious = X;
+            YPrevious = Y;
+
+            if (OnUpdateBegin != null)
             {
                 OnUpdateBegin();
             }
@@ -51,9 +109,94 @@ namespace GameEngine.Engine
                 OnUpdate();
             }
 
-            if(OnUpdateEnd != null)
+            // Move towards a position at a speed
+            if (Speed != 0)
+            {
+                HSpeed = GameMath.LengthDirX(Speed, Direction);
+                VSpeed = GameMath.LengthDirY(Speed, Direction);
+            }
+
+            // Horizontal speed
+            if (HSpeed != 0)
+            {
+                X += HSpeed;
+            }
+
+            // Vertical speed
+            if (VSpeed != 0)
+            {
+                Y += VSpeed;
+            }
+
+            // Gravity
+            if (Gravity != 0)
+            {
+                HSpeed += GameMath.LengthDirX(Gravity, GravityDirection);
+                VSpeed += GameMath.LengthDirY(Gravity, GravityDirection);
+            }
+
+            if (OnUpdateEnd != null)
             {
                 OnUpdateEnd();
+            }
+
+            // Fix the directiom
+            Direction = Direction % 360;
+
+            //Sprite animation
+            if (SpriteIndex != null)
+            {
+                if (ImageIndex >= 1)
+                {
+                    ImageIndex = 0;
+
+                    ImageSingle += 1;
+
+                    if (ImageSingle > SpriteIndex.GetNumber() - 1)
+                    {
+                        ImageSingle = 0;
+                    }
+                }
+
+                ImageIndex += ImageSpeed;
+            }
+
+            // Friction ( Different Way )
+            //HSpeed *= (Friction);
+            //VSpeed *= (Friction);
+
+            // Friction
+            if (HSpeed > 0)
+            {
+                HSpeed -= Friction;
+                if (HSpeed < 0)
+                {
+                    HSpeed = 0;
+                }
+            }
+            if (HSpeed < 0)
+            {
+                HSpeed += Friction;
+                if (HSpeed > 0)
+                {
+                    HSpeed = 0;
+                }
+            }
+            if (VSpeed > 0)
+            {
+                VSpeed -= Friction;
+                if (VSpeed < 0)
+                {
+                    VSpeed = 0;
+                }
+            }
+            if (VSpeed < 0)
+            {
+                VSpeed += Friction;
+                if (VSpeed > 0)
+                {
+                    VSpeed = 0;
+                }
             }
         }
 

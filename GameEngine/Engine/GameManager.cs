@@ -111,9 +111,9 @@ namespace GameEngine.Engine
                 graphics.ToggleFullScreen();
             }
 
-            if (rooms.Count > 0)
+            if (sceneManager.Scenes.Count > 0)
             {
-                rooms[currentRoom].Loop();
+                sceneManager.Scenes[currentSceneId].Update();
             }
 
             previousKeyboardState = keyboardState;
@@ -131,9 +131,9 @@ namespace GameEngine.Engine
 
             spriteBatch.Begin();
 
-            if (rooms.Count > 0)
+            if (sceneManager.Scenes.Count > 0)
             {
-                rooms[currentRoom].Draw();
+                sceneManager.Scenes[currentSceneId].Draw();
             }
 
             spriteBatch.End();

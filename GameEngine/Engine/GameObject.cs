@@ -24,5 +24,48 @@ namespace GameEngine.Engine
         public GameObject()
         {
         }
+
+        /// <summary>
+        /// When the object first spawns in the scene
+        /// </summary>
+        public void Awake()
+        {
+            if(OnAwake != null)
+            {
+                OnAwake();
+            }
+        }
+
+        /// <summary>
+        /// Every loop of the game, this event gets called
+        /// </summary>
+        public void Update()
+        {
+            if(OnUpdateBegin != null)
+            {
+                OnUpdateBegin();
+            }
+
+            if(OnUpdate != null)
+            {
+                OnUpdate();
+            }
+
+            if(OnUpdateEnd != null)
+            {
+                OnUpdateEnd();
+            }
+        }
+
+        /// <summary>
+        /// When we draw using the object
+        /// </summary>
+        public void Draw()
+        {
+            if(OnDraw != null)
+            {
+                OnDraw();
+            }
+        }
     }
 }

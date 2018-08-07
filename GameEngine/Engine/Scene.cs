@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
-    class GameManager
+    class Scene
     {
-        public GameManager()
+        private List<GameObject> objects = new List<GameObject>(); // Hold a list of the game objects in the scene
+
+        public Scene()
         {
 
         }

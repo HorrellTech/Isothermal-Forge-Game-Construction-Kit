@@ -77,6 +77,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Engine\Drawer.cs" />
+    <Compile Include="Engine\FiniteStateMachine\FSM.cs" />
+    <Compile Include="Engine\FiniteStateMachine\FSMQueueExtensions.cs" />
+    <Compile Include="Engine\FiniteStateMachine\FSMSnapshot.cs" />
+    <Compile Include="Engine\FiniteStateMachine\FSMStateBehaviour.cs" />
+    <Compile Include="Engine\FiniteStateMachine\FSMStateData.cs" />
     <Compile Include="Engine\GameManager.cs" />
     <Compile Include="Engine\GameObject.cs" />
     <Compile Include="Engine\GameWindow.cs" />

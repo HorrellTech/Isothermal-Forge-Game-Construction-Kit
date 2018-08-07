@@ -43,6 +43,8 @@ namespace GameEngine.Engine
         private MouseState mouseState;
         private MouseState previousMouseState;
 
+        private ResourceManager resourceManager;
+
         private SceneManager sceneManager;
         private int currentSceneId;
 

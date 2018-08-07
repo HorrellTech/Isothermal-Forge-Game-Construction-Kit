@@ -49,6 +49,7 @@
     <Compile Include="Engine\GameManager.cs" />
     <Compile Include="Engine\GameObject.cs" />
     <Compile Include="Engine\Scene.cs" />
+    <Compile Include="Engine\SceneManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

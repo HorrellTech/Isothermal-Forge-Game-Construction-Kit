@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{F35975C6-54D5-4321-9FA2-10A70F7F6A56}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameEngine", "GameEngine\GameEngine.csproj", "{8719D12D-9C88-468E-8B87-BCAC0876FAF0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleGame", "ExampleGame\ExampleGame.csproj", "{45660FE5-E341-4D20-A9FC-F226CACDACB2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F35975C6-54D5-4321-9FA2-10A70F7F6A56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F35975C6-54D5-4321-9FA2-10A70F7F6A56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F35975C6-54D5-4321-9FA2-10A70F7F6A56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F35975C6-54D5-4321-9FA2-10A70F7F6A56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8719D12D-9C88-468E-8B87-BCAC0876FAF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8719D12D-9C88-468E-8B87-BCAC0876FAF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8719D12D-9C88-468E-8B87-BCAC0876FAF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8719D12D-9C88-468E-8B87-BCAC0876FAF0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45660FE5-E341-4D20-A9FC-F226CACDACB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45660FE5-E341-4D20-A9FC-F226CACDACB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45660FE5-E341-4D20-A9FC-F226CACDACB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45660FE5-E341-4D20-A9FC-F226CACDACB2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CEA3FD20-71D7-4C89-B6AA-F229EA36D09F}
+	EndGlobalSection
+EndGlobal

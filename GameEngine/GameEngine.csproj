@@ -76,6 +76,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Engine\Camera\AspectMode.cs" />
+    <Compile Include="Engine\Camera\Camera.cs" />
+    <Compile Include="Engine\Camera\ICamera.cs" />
+    <Compile Include="Engine\Camera\SpriteBatchExtensions.cs" />
+    <Compile Include="Engine\Camera\Transform.cs" />
     <Compile Include="Engine\Drawer.cs" />
     <Compile Include="Engine\FiniteStateMachine\FSM.cs" />
     <Compile Include="Engine\FiniteStateMachine\FSMQueueExtensions.cs" />

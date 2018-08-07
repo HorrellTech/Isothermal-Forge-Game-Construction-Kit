@@ -9,6 +9,14 @@ namespace GameEngine.Engine
 {
     static class MathHelper
     {
+        public const float E = (float)Math.E;
+        public const float Log10E = 0.4342945f;
+        public const float Log2E = 1.442695f;
+        public const float Pi = (float)Math.PI;
+        public const float PiOver2 = (float)(Math.PI / 2.0);
+        public const float PiOver4 = (float)(Math.PI / 4.0);
+        public const float TwoPi = (float)(Math.PI * 2.0);
+
         /// <summary>
         /// Gets the angle between 2 points
         /// </summary>
@@ -73,10 +81,36 @@ namespace GameEngine.Engine
             return (float)(len * -System.Math.Sin(dir * deg2Rad()));
         }
 
+        /// <summary>
+        /// Returns the distance between 2 floating points
+        /// </summary>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <returns></returns>
+        public static float Distance(float value1, float value2)
+        {
+            return Math.Abs(value1 - value2);
+        }
+
+        /// <summary>
+        /// Clamp a value
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static float Clamp(float value, float min, float max)
         {
-            return (value < min) ? min : (value > max) ? max : value;
+            // First we check to see if we're greater than the max
+            value = (value > max) ? max : value;
+
+            // Then we check to see if we're less than the min.
+            value = (value < min) ? min : value;
+
+            // There's no check to see if min > max.
+            return value;
         }
+
         /// <summary>
         /// Snap a position to an invisible grid space
         /// </summary>
@@ -112,6 +146,28 @@ namespace GameEngine.Engine
         public static float Tween(float value, float time, float startValue, float stopValue)
         {
             return Median(startValue, value + (stopValue - startValue) / time, stopValue);
+        }
+
+        /// <summary>
+        /// Smoothly step a value to another value in a set amount
+        /// </summary>
+        /// <param name="value1"></param>
+        /// <param name="value2"></param>
+        /// <param name="amount"></param>
+        /// <returns></returns>
+        public static float SmoothStep(float value1, float value2, float amount)
+        {
+            // It is expected that 0 < amount < 1
+            // If amount < 0, return value1
+            // If amount > 1, return value2
+#if(USE_FARSEER)
+            float result = SilverSpriteMathHelper.Clamp(amount, 0f, 1f);
+            result = SilverSpriteMathHelper.Hermite(value1, 0f, value2, 0f, result);
+#else
+            float result = MathHelper.Clamp(amount, 0f, 1f);
+            result = MathHelper.Hermite(value1, 0f, value2, 0f, result);
+#endif
+            return result;
         }
 
         /// <summary>
@@ -291,6 +347,42 @@ namespace GameEngine.Engine
         public static float Deg2Rad(float angle)
         {
             return (float)((System.Math.PI / 180) * angle);
+        }
+
+        public static float ToDegrees(float radians)
+        {
+            // This method uses double precission internally,
+            // though it returns single float
+            // Factor = 180 / pi
+            return (float)(radians * 57.295779513082320876798154814105);
+        }
+
+        public static float ToRadians(float degrees)
+        {
+            // This method uses double precission internally,
+            // though it returns single float
+            // Factor = pi / 180
+            return (float)(degrees * 0.017453292519943295769236907684886);
+        }
+
+        public static float Hermite(float value1, float tangent1, float value2, float tangent2, float amount)
+        {
+            // All transformed to double not to lose precission
+            // Otherwise, for high numbers of param:amount the result is NaN instead of Infinity
+            double v1 = value1, v2 = value2, t1 = tangent1, t2 = tangent2, s = amount, result;
+            double sCubed = s * s * s;
+            double sSquared = s * s;
+
+            if (amount == 0f)
+                result = value1;
+            else if (amount == 1f)
+                result = value2;
+            else
+                result = (2 * v1 - 2 * v2 + t2 + t1) * sCubed +
+                    (3 * v2 - 3 * v1 - 2 * t1 - t2) * sSquared +
+                    t1 * s +
+                    v1;
+            return (float)result;
         }
     }
 }

@@ -58,6 +58,7 @@ namespace GameEngine.Engine
         public bool Persistent = false;
         public bool Active = true;
         public bool Visible = true;
+        public bool UseBuiltInPhysics = true;
 
         public int Depth = 0;
 
@@ -109,30 +110,33 @@ namespace GameEngine.Engine
                 OnUpdate();
             }
 
-            // Move towards a position at a speed
-            if (Speed != 0)
+            if (UseBuiltInPhysics)
             {
-                HSpeed = GameMath.LengthDirX(Speed, Direction);
-                VSpeed = GameMath.LengthDirY(Speed, Direction);
-            }
+                // Move towards a position at a speed
+                if (Speed != 0)
+                {
+                    HSpeed = MathHelper.LengthDirX(Speed, Direction);
+                    VSpeed = MathHelper.LengthDirY(Speed, Direction);
+                }
 
-            // Horizontal speed
-            if (HSpeed != 0)
-            {
-                X += HSpeed;
-            }
+                // Horizontal speed
+                if (HSpeed != 0)
+                {
+                    X += HSpeed;
+                }
 
-            // Vertical speed
-            if (VSpeed != 0)
-            {
-                Y += VSpeed;
-            }
+                // Vertical speed
+                if (VSpeed != 0)
+                {
+                    Y += VSpeed;
+                }
 
-            // Gravity
-            if (Gravity != 0)
-            {
-                HSpeed += GameMath.LengthDirX(Gravity, GravityDirection);
-                VSpeed += GameMath.LengthDirY(Gravity, GravityDirection);
+                // Gravity
+                if (Gravity != 0)
+                {
+                    HSpeed += MathHelper.LengthDirX(Gravity, GravityDirection);
+                    VSpeed += MathHelper.LengthDirY(Gravity, GravityDirection);
+                }
             }
 
             if (OnUpdateEnd != null)
@@ -165,37 +169,40 @@ namespace GameEngine.Engine
             //HSpeed *= (Friction);
             //VSpeed *= (Friction);
 
-            // Friction
-            if (HSpeed > 0)
+            if (UseBuiltInPhysics)
             {
-                HSpeed -= Friction;
-                if (HSpeed < 0)
-                {
-                    HSpeed = 0;
-                }
-            }
-            if (HSpeed < 0)
-            {
-                HSpeed += Friction;
+                // Friction
                 if (HSpeed > 0)
                 {
-                    HSpeed = 0;
+                    HSpeed -= Friction;
+                    if (HSpeed < 0)
+                    {
+                        HSpeed = 0;
+                    }
                 }
-            }
-            if (VSpeed > 0)
-            {
-                VSpeed -= Friction;
-                if (VSpeed < 0)
+                if (HSpeed < 0)
                 {
-                    VSpeed = 0;
+                    HSpeed += Friction;
+                    if (HSpeed > 0)
+                    {
+                        HSpeed = 0;
+                    }
                 }
-            }
-            if (VSpeed < 0)
-            {
-                VSpeed += Friction;
                 if (VSpeed > 0)
                 {
-                    VSpeed = 0;
+                    VSpeed -= Friction;
+                    if (VSpeed < 0)
+                    {
+                        VSpeed = 0;
+                    }
+                }
+                if (VSpeed < 0)
+                {
+                    VSpeed += Friction;
+                    if (VSpeed > 0)
+                    {
+                        VSpeed = 0;
+                    }
                 }
             }
         }

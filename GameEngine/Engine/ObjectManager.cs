@@ -8,5 +8,20 @@ namespace GameEngine.Engine
 {
     class ObjectManager
     {
+        List<GameObject> objects = new List<GameObject>();
+
+        public ObjectManager()
+        {
+        }
+
+        public void Update()
+        {
+            
+        }
+
+        public void Draw()
+        {
+
+        }
     }
 }

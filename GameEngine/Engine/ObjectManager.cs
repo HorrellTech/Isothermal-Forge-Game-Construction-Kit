@@ -8,12 +8,19 @@ namespace GameEngine.Engine
 {
     class ObjectManager
     {
+        public delegate void CreateEvent();
+        public event CreateEvent OnCreate;
+
         private List<GameObject> objects = new List<GameObject>();
         private GameManager manager;
 
         private long instanceId = 0;
         private List<GameObject> toBeDeleted = new List<GameObject>(); // Hold objects to be deleted
         private List<GameObject> toBeCreated = new List<GameObject>(); // Hold objects to be created
+
+        private bool beenCreated = false;
+
+        public bool Paused = false;
 
         public ObjectManager(GameManager manager)
         {
@@ -22,12 +29,58 @@ namespace GameEngine.Engine
 
         public void Update()
         {
-            
+            if (!beenCreated)
+            {
+                if (OnCreate != null)
+                {
+                    OnCreate();
+                }
+
+                beenCreated = true;
+            }
+
+            //UpdateDeleted();
+            UpdateCreated();
+
+            if (objects.Count > 0)
+            {
+                try
+                {
+                    foreach (var inst in objects)
+                    {
+                        if (inst.Active)
+                        {
+                            if (!Paused)
+                            {
+                                inst.Update();
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+            }
         }
 
         public void Draw()
         {
-
+            if (objects.Count > 0)
+            {
+                try
+                {
+                    foreach (var inst in objects)
+                    {
+                        if (inst.Active)
+                        {
+                            if (inst.Visible)
+                            {
+                                inst.Draw();
+                            }
+                        }
+                    }
+                }
+                catch { }
+            }
         }
 
         public void InstanceDestroy(long id)
@@ -145,7 +198,7 @@ namespace GameEngine.Engine
         private void InstanceAddRange(List<GameObject> obj)
         {
             List<GameObject> ob = new List<GameObject>();//obj.InstanceCreate(x, y);
-            Type t = Type.GetType("GameMakerMono." + obj[0].GetType().Name);
+            Type t = Type.GetType(obj.GetType().FullName);
 
             object o = Activator.CreateInstance(t, manager);
             var oo = (GameObject)o;
@@ -166,7 +219,7 @@ namespace GameEngine.Engine
         private GameObject InstanceAdd(float x, float y, GameObject obj)
         {
             GameObject ob = null;//obj.InstanceCreate(x, y);
-            Type t = Type.GetType("GameMakerMono." + obj.GetType().Name);
+            Type t = Type.GetType(obj.GetType().FullName);
 
             object o = Activator.CreateInstance(t, manager);
             ob = (GameObject)o;
@@ -189,10 +242,10 @@ namespace GameEngine.Engine
         /// <param name="y"></param>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public GameObject InstanceCreate(float x, float y, GameObject obj)
+        public GameObject Instantiate(float x, float y, GameObject obj)
         {
-            GameObject ob = null;//obj.InstanceCreate(x, y);
-            Type t = Type.GetType("GameMakerMono." + obj.GetType().Name);
+            GameObject ob = null;
+            Type t = Type.GetType(obj.GetType().FullName);
 
             object o = Activator.CreateInstance(t, manager);
             ob = (GameObject)o;
@@ -207,16 +260,16 @@ namespace GameEngine.Engine
         }
 
         /// <summary>
-        /// Creates an instance of an object
+        /// Creates an instance of an object using the namespace + name
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        /// <param name="obj"></param>
+        /// <param name="className"></param>
         /// <returns></returns>
-        public GameObject InstanceCreate(float x, float y, string name)
+        public GameObject Instantiate(float x, float y, string className)
         {
-            GameObject ob = null;//obj.InstanceCreate(x, y);
-            Type t = Type.GetType("GameMakerMono." + name);
+            GameObject ob = null;
+            Type t = Type.GetType("GameEngine." + className);
 
             object o = Activator.CreateInstance(t, manager);
             ob = (GameObject)o;

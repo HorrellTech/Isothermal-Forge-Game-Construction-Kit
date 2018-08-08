@@ -243,5 +243,10 @@ namespace GameEngine.Engine
                 OnDraw();
             }
         }
+
+        public void InstanceDestroy()
+        {
+            Active = false;
+        }
     }
 }

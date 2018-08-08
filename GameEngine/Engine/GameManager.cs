@@ -1,11 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
@@ -61,8 +56,17 @@ namespace GameEngine.Engine
             drawer = new Drawer(game, spriteBatch);
             this.graphics = graphics;
             currentSceneId = 0;
+            sceneManager = new SceneManager(this);
 
             SetWindowSize(width, height, true);
+        }
+
+        public SceneManager SceneManager
+        {
+            get
+            {
+                return (sceneManager);
+            }
         }
 
         /// <summary>

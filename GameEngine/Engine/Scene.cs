@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
-    class Scene
+    public class Scene
     {
         private ObjectManager objectManager;
 

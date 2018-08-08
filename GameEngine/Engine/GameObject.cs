@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
-    class GameObject
+    public class GameObject
     {
         // Delegates and events for 
         public delegate void AwakeEvent();

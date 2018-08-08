@@ -9,16 +9,17 @@ using System.Threading.Tasks;
 
 namespace GameEngine.Engine
 {
-    class GameWindow : Game
+    public class GameWindow : Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
         GameManager manager;
-
+        
         public GameWindow()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            manager = new GameManager(640, 480, this, spriteBatch, graphics);
         }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace GameEngine.Engine
                 Exit();
 
             // TODO: Add your update logic here
-            // manager.Update();
+            manager.Loop();
 
             base.Update(gameTime);
         }
@@ -81,7 +82,7 @@ namespace GameEngine.Engine
             GraphicsDevice.Clear(Color.LightGray);
 
             // TODO: Add your drawing code here
-            // manager.Draw();
+            manager.Draw();
 
             base.Draw(gameTime);
         }

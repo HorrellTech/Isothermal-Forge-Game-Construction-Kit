@@ -26,25 +26,56 @@ namespace GameEngine.Engine
             spriteFont = null;
         }
 
+        /// <summary>
+        /// Set the drawing font
+        /// </summary>
+        /// <param name="spriteFont"></param>
         public void DrawSetFont(SpriteFont spriteFont)
         {
             this.spriteFont = spriteFont;
         }
 
+        /// <summary>
+        /// Set the drawing color
+        /// </summary>
+        /// <param name="color"></param>
         public void DrawSetColor(Color color)
         {
             this.color = color;
         }
 
+        /// <summary>
+        /// Set the drawing alpha
+        /// </summary>
+        /// <param name="alpha"></param>
         public void DrawSetAlpha(float alpha)
         {
             this.alpha = alpha;
         }
 
-        public void DrawSprite(Sprite sprite, int imageSingle, float x, float y)
+        /// <summary>
+        /// Red green blue
+        /// </summary>
+        /// <param name="r"></param>
+        /// <param name="g"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public Color RGB(int r, int g, int b)
         {
-            var w = sprite.Image.Width / sprite.GetNumber();
-            spriteBatch.Draw(sprite.Image, new Rectangle((int)x, (int)y, (w), (sprite.Image.Height)), new Rectangle(w * imageSingle, 0, w, sprite.Image.Height), Color.White, 0, new Vector2(sprite.OriginX, sprite.OriginY), SpriteEffects.None, 0);
+            return (new Color(r, g, b));
+        }
+
+        /// <summary>
+        /// Alpha red green bue
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="r"></param>
+        /// <param name="g"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public Color ARGB(int a, int r, int g, int b)
+        {
+            return (new Color(r, g, b, a));
         }
 
         public void DrawSpriteExt(Sprite sprite, int imageSingle, float x, float y, float imageXScale, float imageYScale, float imageAngle, Color imageBlend, float imageAlpha, int depth)
@@ -71,6 +102,18 @@ namespace GameEngine.Engine
             if (spriteFont != null)
             {
                 spriteBatch.DrawString(spriteFont, text, new Vector2(x, y), new Color(color, alpha));
+            }
+        }
+
+        public void DrawRectangle(float x1, float y1, float x2, float y2, bool outline)
+        {
+            if (outline)
+            {
+                Primitives2D.DrawRectangle(spriteBatch, new Rectangle((int)x1, (int)y1, (int)x2 - (int)x1, (int)y2 - (int)y1), color);
+            }
+            else
+            {
+                Primitives2D.FillRectangle(spriteBatch, new Rectangle((int)x1, (int)y1, (int)x2 - (int)x1, (int)y2 - (int)y1), color);
             }
         }
     }

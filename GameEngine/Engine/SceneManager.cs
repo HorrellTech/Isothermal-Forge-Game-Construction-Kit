@@ -10,10 +10,21 @@ namespace GameEngine.Engine
     {
         public List<Scene> scenes = new List<Scene>(); // Hold a list of the scenes in the game
         public int currentSceneId;
+        private GameManager manager;
 
-        public SceneManager()
+        public SceneManager(GameManager manager)
         {
+            this.manager = manager;
             currentSceneId = 0;
+        }
+
+        public Scene SceneAdd()
+        {
+            Scene scene = new Scene(manager);
+
+            scenes.Add(scene);
+
+            return (scene);
         }
 
         public void Update()
@@ -30,6 +41,11 @@ namespace GameEngine.Engine
             {
                 scenes[currentSceneId].Draw();
             }
+        }
+
+        public Scene GetScene(int index)
+        {
+            return (scenes[index]);
         }
 
         /// <summary>

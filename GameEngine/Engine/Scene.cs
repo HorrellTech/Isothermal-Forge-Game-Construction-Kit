@@ -9,11 +9,11 @@ namespace GameEngine.Engine
 {
     class Scene
     {
-        private List<GameObject> objects = new List<GameObject>(); // Hold a list of the game objects in the scene
+        private ObjectManager objectManager;
 
-        public Scene()
+        public Scene(GameManager manager)
         {
-
+            objectManager = new ObjectManager(manager);
         }
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace GameEngine.Engine
         /// </summary>
         public void Update()
         {
-            
+            objectManager.Update();
         }
 
         /// <summary>
@@ -29,7 +29,31 @@ namespace GameEngine.Engine
         /// </summary>
         public void Draw()
         {
+            objectManager.Draw();
+        }
 
+        /// <summary>
+        /// Create a new object
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="objectClassName"></param>
+        /// <returns></returns>
+        public GameObject Instantiate(float x, float y, GameObject obj)
+        {
+            return(objectManager.Instantiate(x, y, obj));
+        }
+
+        /// <summary>
+        /// Create a new object
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="objectClassName"></param>
+        /// <returns></returns>
+        public GameObject Instantiate(float x, float y, string objectClassName)
+        {
+            return (objectManager.Instantiate(x, y, objectClassName));
         }
     }
 }

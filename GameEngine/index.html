@@ -2,28 +2,50 @@
 
 <html>
     <head>
-        <title>Home</title>
-		
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta http-equiv="pragma" content="no-cache"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name ="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta charset="utf-8"/>
+
+        <title>My Game</title>
+        
+        <style>
+            body {
+              background: #000000;
+              color:#cccccc;
+              margin: 0px;
+              padding: 0px;
+              border: 0px;
+            }
+            canvas {
+                      image-rendering: optimizeSpeed;
+                      -webkit-interpolation-mode: nearest-neighbor;
+                      margin: auto;
+                      padding: 0px;
+                      border: 0px;
+                      background-color: #cccccc;
+                      display: block;
+            }
+            :-webkit-full-screen #canvas {
+                 width: 100%;
+                 height: 100%;
+            }
+            :-webkit-full-screen {
+               width: 100%;
+               height: 100%;
+            }
+        </style>
+        <script type="text/javascript" src="js/game.js"></script>
 	</head>
     
-    <body onLoad="init();"> <!-- onLoad="function name that is in the script to start the game" -->
-        
-        <h2 style="float:center; margin:0 auto">This is my game</h2>
-        
-        <p id="paragraph">
-            This is my game description
-        </p>
-        
-        <!--
-            Heres the footer.
-            
-            We are loading the images for the game here.
-            
-            Make the image invisible, as we are only loading it for the game.
-            <img src="Images/can.png" id="imgCan" visibility="invisible" />
-        -->
-        <footer id="footer">
-		
-        </footer>
+    <body onload="gameStart()"> <!-- onLoad="function name that is in the script to start the game" -->
+        <div id="container">
+            <!-- Create the canvas element the game draws to -->
+            <canvas id="canvas" width="640" height="480" oncontextmenu="return false">
+               <p>Your browser doesn't support HTML5 canvas!</p>
+            </canvas>
+        </div>
     </body>
 </html>

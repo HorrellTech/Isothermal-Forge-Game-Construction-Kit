@@ -1,23 +1,27 @@
 var gameObjects = []; // The game object list
+var p;
 
 // Start the game
 function gameStart()
 {
-    game.start();
+    game.start(640, 480);
 
     // Test game object
     var obj = object_add();
 
-    instance_create(64, 64, obj);
+    p = new gameObject(0, 0, 0, 0);
+    gameObjects.push(p);
+    //instance_create(64, 64, obj);
 }
 
 // The main game area where the canvas will be held
-var game = {
+var game = 
+{
     canvas : createCanvas(),
     start : function(width, height) {
         this.canvas.width = width;
         this.canvas.height = height;
-        this.context = this.canvas.getContext("2d");
+        this.context = this.canvas.getContext('2d');
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
@@ -27,6 +31,7 @@ var game = {
     }
 }
 
+// Create an new instance of an object
 function instance_create(x, y, object)
 {
     var temp = object.instantiate(x, y);
@@ -75,16 +80,14 @@ function gameObject(x, y, width, height)
             awake();
             hasWoken = true;
         }
+        alert("");
     }
 
     // Draw on every loop
     this.draw = function()
     {
-        game.context.beginPath();
-        game.context.lineWidth = "6";
-        game.context.strokeStyle = "red";
-        game.context.rect(5,5,290,140);
-        game.context.stroke();
+        game.context.fillStyle = "red";
+        game.context.fillRect(5,5,290,140);
     }
 
     // Add a new instance to this object
@@ -121,9 +124,9 @@ function gameObject(x, y, width, height)
 function updateGameArea()
 {
     game.clear();
-    game.frameNo += 1;
-    if (game.frameNo == 1 || everyinterval(150)) 
-    {
+   // game.frameNo += 1;
+   // if (game.frameNo == 1 || everyinterval(150)) 
+   // {
         // This is the main game loop
         for (i = 0; i < gameObjects.length; i += 1) 
         {
@@ -131,6 +134,7 @@ function updateGameArea()
             {
                 gameobjects[i].instances[j].update();
             }
+            gameobjects[i].update();
         }
         for (i = 0; i < gameObjects.length; i += 1) 
         {
@@ -139,7 +143,7 @@ function updateGameArea()
                 gameobjects[i].instances[j].draw();
             }
         }
-    }
+   // }
 }
 
 // If the canvas exists, use it, otherwise create a new one
@@ -153,7 +157,10 @@ function createCanvas()
     }
     else
     {
-        return(document.createElement("canvas"));
+        canv = (document.createElement("canvas"));
+        canv.oncontextmenu = function(e){ return false; } // Disable the context menu on right click
+
+        return(canv);
     }
 }
 

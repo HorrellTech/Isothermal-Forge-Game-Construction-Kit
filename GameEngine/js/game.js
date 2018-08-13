@@ -21,17 +21,31 @@ function gameStart()
 
     obj.draw = function()
     {
-        this.x += 1;
+        //this.hspeed = 1;
+        //this.gravity = 2;
+        //this.friction = 0.3;
+        //this.motion_add(direction, 1);
+        this.speed = random_range(0, 10);
+        this.direction += random(180);
         if(this.x > room_width)
         {
             this.x = -31;
         }
-        context.fillStyle = 'red';
-        for(var i = this.width; i > 0; i -= 1)
+        if(this.x + this.width < 0)
         {
-            context.fillStyle = rgb(255, (i * 10), (i * 10));
-            context.fillRect(this.x - i, this.y + (i / 2), this.width - i, this.height - i);
+            this.x = room_width;
         }
+        if(this.y > room_height)
+        {
+            this.y = -31;
+        }
+        if(this.y + this.height < 0)
+        {
+            this.y = room_height;
+        }
+        context.fillStyle = 'red';
+        context.fillStyle = rgb(255, 0, 0);
+        context.fillRect(this.x, this.y, this.width, this.height);
     };
 
     instance_create(64, 64, obj);
@@ -84,6 +98,8 @@ function gameObject(x, y, width, height)
 {
     this.instances = [];
 
+    this.active = true;
+
     this.x = x;
     this.y = y;
     this.xstart = x;
@@ -98,7 +114,7 @@ function gameObject(x, y, width, height)
     this.speed = 0;
     this.direction = 0;
     this.gravity = 0;
-    this.gravity_direction = 0;
+    this.gravity_direction = 270;
 
     this.hasWoken = false;
 
@@ -138,12 +154,14 @@ function gameObject(x, y, width, height)
         this.loop_begin();
         this.loop();
 
+        // The speed functionality
         if(this.speed != 0)
         {
             this.hspeed = lengthdir_x(this.speed, this.direction);
             this.vspeed = lengthdir_y(this.speed, this.direction);
         }
 
+        // Horizontal speed and vertical speed functionality
         if(this.hspeed != 0)
         {
             this.x += this.hspeed;
@@ -153,14 +171,58 @@ function gameObject(x, y, width, height)
             this.y += this.vspeed;
         }
 
+        // Gravity functionality
+        if(this.gravity != 0)
+        {
+            this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
+            this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
+        }
+
         this.loop_end();
-    }
+
+        // Stop direction from exceeding 360 degrees
+        this.direction = (this.direction % 360.0);
+
+        // Friction
+        if (this.hspeed > 0)
+        {
+            this.hspeed -= this.friction;
+            if(this.hspeed < 0)
+            {
+                this.hspeed = 0;
+            }
+        }
+        if (this.hspeed < 0)
+        {
+            this.hspeed += this.friction;
+            if (this.hspeed > 0)
+            {
+                this.hspeed = 0;
+            }
+        }
+        if (this.vspeed > 0)
+        {
+            this.vspeed -= this.friction;
+            if (this.vspeed < 0)
+            {
+                this.vspeed = 0;
+            }
+        }
+        if (this.vspeed < 0)
+        {
+            this.vspeed += this.friction;
+            if (this.vspeed > 0)
+            {
+                this.vspeed = 0;
+            }
+        }
+    };
 
     // The draw called in the game update method (DO NOT OVER WRITE)
     this.mainDraw = function()
     {
         this.draw();
-    }
+    };
 
     // Add a new instance to this object
     this.instantiate = function(x, y)
@@ -174,6 +236,33 @@ function gameObject(x, y, width, height)
 
         return(temp);
     };
+
+    // Add motion towards a direction
+    this.motion_add = function(dir, spd)
+    {
+        this.speed += spd;
+        this.direction = dir;
+    };
+
+    // Set motion in a direction
+    this.motion_set = function(direction, speed)
+    {
+        this.speed = speed;
+        this.direction = direction;
+    };
+
+    // Collides with object of a type
+    this.collision = function(other)
+    {
+        for(var i = 0; i < other.instances.length; i += 1)
+        {
+            if(this.collides_with(other.instances[i]))
+            {
+                return (true);
+            }
+        }
+        return (false);
+    }
 
     // Collision with another game object
     this.collides_with = function(other) 
@@ -216,7 +305,10 @@ function updateGameArea()
         {
             for(var y = 0; y < this.gameObjects[x].instances.length; y += 1)
             {
-                this.gameObjects[x].instances[y].mainDraw();
+                //if(this.gameObjects[x].instances[y].active)
+                //{
+                    this.gameObjects[x].instances[y].mainDraw();
+                //}
             }
         }
 }
@@ -301,15 +393,15 @@ function cos(x)
 }
 
 // Returns the cosine of a number from degrees to radians
-function dcos(x)
+/*function dcos(x)
 {
     return(cos(degtorad(x)));
-}
+}*/
 
 // Returns degrees to radians
-function degtorad(x)
+function degtorad()
 {
-    return ((Math.PI * 2) / 360);
+    return ((Math.PI * 2) / -360);
 }
 
 // Snap a position to a grid position

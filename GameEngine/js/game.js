@@ -4,14 +4,18 @@ var p;
 // Start the game
 function gameStart()
 {
-    game.start(640, 480);
-
     // Test game object
     var obj = object_add();
 
-    p = new gameObject(0, 0, 0, 0);
-    gameObjects.push(p);
-    //instance_create(64, 64, obj);
+    obj.draw = function()
+    {
+        game.context.fillStyle = "red";
+        game.context.fillRect(this.x, this.y, this.width, this.height);
+    };
+
+    var inst = instance_create(64, 64, obj);
+
+    game.start(640, 480);
 }
 
 // The main game area where the canvas will be held
@@ -29,7 +33,7 @@ var game =
     clear : function() {
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
-}
+};
 
 // Create an new instance of an object
 function instance_create(x, y, object)
@@ -70,35 +74,32 @@ function gameObject(x, y, width, height)
 
     // When the object is first created
     this.awake = function()
-    {}
+    {};
 
     // Perform on every loop
     this.update = function() 
     {
-        if(!hasWoken)
+        if(!this.hasWoken)
         {
-            awake();
-            hasWoken = true;
+            this.awake();
+            this.hasWoken = true;
         }
-        alert("");
-    }
+    };
 
     // Draw on every loop
     this.draw = function()
     {
-        game.context.fillStyle = "red";
-        game.context.fillRect(5,5,290,140);
-    }
+    };
 
     // Add a new instance to this object
     this.instantiate = function(x, y)
     {
         var temp = new gameObject(x, y, width, height);
 
-        instances.push(temp);
+        this.instances.push(temp);
 
         return(temp);
-    }
+    };
 
     // Collision with another game object
     this.collides_with = function(other) 
@@ -117,33 +118,35 @@ function gameObject(x, y, width, height)
             crash = false;
         }
         return crash;
-    }
+    };
 }
 
 // Main update loop
 function updateGameArea()
 {
     game.clear();
-   // game.frameNo += 1;
-   // if (game.frameNo == 1 || everyinterval(150)) 
-   // {
+    game.frameNo += 1;
+    if (game.frameNo == 1 || everyinterval(150)) 
+    {
         // This is the main game loop
-        for (i = 0; i < gameObjects.length; i += 1) 
+        for (var i = 0; i < this.gameObjects.length - 1; i += 1) 
         {
-            for(j = 0; j < gameobjects[i].instances.length; j += 1)
+            for(var j = 0; j < this.gameobjects[i].instances.length - 1; j += 1)
             {
-                gameobjects[i].instances[j].update();
+                this.gameobjects[i].instances[j].update();
             }
-            gameobjects[i].update();
+                alert("");// + this.gameObjects[i].instances.length);
         }
-        for (i = 0; i < gameObjects.length; i += 1) 
+        for (var x = 0; x < this.gameObjects.length - 1; x += 1) 
         {
-            for(j = 0; j < gameobjects[i].instances.length; j += 1)
+            for(var y = 0; y < this.gameobjects[i].instances.length - 1; y += 1)
             {
-                gameobjects[i].instances[j].draw();
+                this.gameobjects[x].instances[y].draw();
             }
         }
-   // }
+        
+        //alert("" + gameObjects.length + " instances in the scene");
+    }
 }
 
 // If the canvas exists, use it, otherwise create a new one
@@ -158,7 +161,7 @@ function createCanvas()
     else
     {
         canv = (document.createElement("canvas"));
-        canv.oncontextmenu = function(e){ return false; } // Disable the context menu on right click
+        canv.oncontextmenu = function(e){ return false; }; // Disable the context menu on right click
 
         return(canv);
     }

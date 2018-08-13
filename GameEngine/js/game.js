@@ -10,7 +10,7 @@ function gameStart()
     obj.draw = function()
     {
         game.context.fillStyle = "red";
-        game.context.fillRect(this.x, this.y, this.width, this.height);
+        game.context.fillRect(x, y, width, height);
     };
 
     var inst = instance_create(64, 64, obj);
@@ -129,19 +129,19 @@ function updateGameArea()
     if (game.frameNo == 1 || everyinterval(150)) 
     {
         // This is the main game loop
-        for (var i = 0; i < this.gameObjects.length - 1; i += 1) 
+        for (var i = 0; i < this.gameObjects.length; i += 1) 
         {
-            for(var j = 0; j < this.gameobjects[i].instances.length - 1; j += 1)
+            for(var j = 0; j < this.gameObjects[i].instances.length; j += 1)
             {
-                this.gameobjects[i].instances[j].update();
+                this.gameObjects[i].instances[j].update();
+            //alert("" + this.gameObjects[i].instances.length);
             }
-                alert("");// + this.gameObjects[i].instances.length);
         }
-        for (var x = 0; x < this.gameObjects.length - 1; x += 1) 
+        for (var x = 0; x < this.gameObjects.length; x += 1) 
         {
-            for(var y = 0; y < this.gameobjects[i].instances.length - 1; y += 1)
+            for(var y = 0; y < this.gameObjects[i].instances.length; y += 1)
             {
-                this.gameobjects[x].instances[y].draw();
+                this.gameObjects[x].instances[y].draw();
             }
         }
         

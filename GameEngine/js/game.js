@@ -140,7 +140,17 @@ function gameObject(x, y, width, height)
 
         if(this.speed != 0)
         {
-            this.hspeed = lengt
+            this.hspeed = lengthdir_x(this.speed, this.direction);
+            this.vspeed = lengthdir_y(this.speed, this.direction);
+        }
+
+        if(this.hspeed != 0)
+        {
+            this.x += this.hspeed;
+        }
+        if(this.vspeed != 0)
+        {
+            this.y += this.vspeed;
         }
 
         this.loop_end();
@@ -266,6 +276,12 @@ function ceil(x)
     return (Math.ceil(x));
 }
 
+// Returns the absolute value of a number
+function abs(x)
+{
+    return (Math.abs(x));
+}
+
 // Returns a supplied numeric expression rounded to the nearest number
 function round(x)
 {
@@ -314,5 +330,65 @@ function point_direction(x1, y1, x2, y2)
     var xdiff = x2 - x1;
     var ydiff = y2 - y1;
 
-    return(-(Math.atan2(ydiff, xdiff) * 180.0 / Math.PI));
+    return (-(Math.atan2(ydiff, xdiff) * 180.0 / Math.PI));
+}
+
+// Returns the length and direction on the x axis
+function lengthdir_x(length, direction)
+{
+    return (length * cos(direction * degtorad()));
+}
+
+// Returns the length and direction on the y axis
+function lengthdir_y(length, direction)
+{
+    return (length * sin(direction * degtorad()));
+}
+
+// Lerp a value towards another value
+function lerp(from, to, amount)
+{
+    return (from + amount * (to - from)); 
+}
+
+// Returns a random floating point from 1 to max value
+function random(max)
+{
+    return ((Math.random() * max) + 1);
+}
+
+// Returns a random floating point from min to max value
+function random_range(min, max)
+{
+    return (Math.random() * (max - min) + min);
+}
+
+// Returns a random integer from 1 to max value
+function irandom(max)
+{
+    return (floor((Math.random() * max) + 1));
+}
+
+// Returns a random integer from min to max value
+function irandom_range(min, max)
+{
+    return (floor(Math.random() * (max - min) + min));
+}
+
+// Returns either true or false
+function random_bool()
+{
+    return (Math.random() >= 0.5);
+}
+
+// Returns a value as a string
+function string(val)
+{
+    return (val.toString());
+}
+
+// Converts a string to an integer
+function real(val)
+{
+    return (parseInt(val));
 }

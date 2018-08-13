@@ -54,11 +54,45 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Messagebox\DialogAbout.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Messagebox\DialogAbout.Designer.cs" />
+    <Compile Include="Messagebox\DialogControls.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Messagebox\DialogControls.Designer.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Forms\DockConsole.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockConsole.Designer.cs" />
+    <Compile Include="Forms\DockDocument.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockDocument.Designer.cs" />
+    <Compile Include="Forms\DockHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockHistory.Designer.cs" />
+    <Compile Include="Forms\DockLayers.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockLayers.Designer.cs" />
+    <Compile Include="Forms\DockProject.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockProject.Designer.cs" />
+    <Compile Include="Forms\DockProperties.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Forms\DockProperties.Designer.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Messagebox\DialogAbout.resx" />
+    <EmbeddedResource Include="Messagebox\DialogControls.resx" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -68,6 +102,12 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Forms\DockConsole.resx" />
+    <EmbeddedResource Include="Forms\DockDocument.resx" />
+    <EmbeddedResource Include="Forms\DockHistory.resx" />
+    <EmbeddedResource Include="Forms\DockLayers.resx" />
+    <EmbeddedResource Include="Forms\DockProject.resx" />
+    <EmbeddedResource Include="Forms\DockProperties.resx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

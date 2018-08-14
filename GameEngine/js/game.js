@@ -1,3 +1,8 @@
+(function() {
+    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+})();
+
 // CONSTANTS
 const pi = Math.PI; // PI
 const t = 1; // True
@@ -10,6 +15,7 @@ const noone = -4; // No instance at all
 var gameObjects = []; // The game object list
 var context;
 var dt;
+var keys = []; // Keyboard keys
 
 // GLOBAL VARIABLES
 var room_speed;
@@ -19,9 +25,28 @@ var view_xview;
 var view_yview;
 var view_wview;
 var view_hview;
+var mouse_x;
+var mouse_y;
 var score;
 var health;
 var lives;
+
+// Input events
+document.body.addEventListener('keydown', function(e) 
+{
+    keys[e.keyCode] = true;
+});
+ 
+document.body.addEventListener('keyup', function(e) 
+{
+    keys[e.keyCode] = false;
+});
+
+document.body.addEventListener('mousemove', function(e)
+{
+    mouse_x = e.x - game.canvas.offsetLeft;
+    mouse_y = e.y - game.canvas.offsetTop;
+});
 
 // Start the game
 function gameStart()
@@ -49,7 +74,7 @@ function gameStart()
     obj.draw = function()
     {
         this.motion_set(this.direction + random_range(-10, 10), random_range(10, 10));
-        
+        this.x = mouse_x;
         if(this.x > room_width)
         {
             this.x = -31;
@@ -120,8 +145,9 @@ var game =
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
         document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        this.frameNo = 0;
-        this.interval = setInterval(updateGameArea, (1000 / room_speed));
+        //this.frameNo = 0;
+        //this.interval = setInterval(updateGameArea, (1000 / room_speed));
+        updateGameArea();
         },
     clear : function() {
         if(this.cont == '2d')
@@ -488,6 +514,7 @@ function updateGameArea()
                 }
             }
         }
+        requestAnimationFrame(updateGameArea);
 }
 
 // If the canvas exists, use it, otherwise create a new one

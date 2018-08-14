@@ -33,6 +33,10 @@ function gameStart()
     lives = 3;
 
     context = game.context;
+
+   // var rMan = new resourceManager();
+    
+
     // Test game object
     var obj = object_add();
     obj.width = 32;
@@ -64,6 +68,7 @@ function gameStart()
         }
         context.fillStyle = rgb(255, 0, 0);
         context.fillRect(this.x, this.y, this.width, this.height);
+        //context.drawImage(rMan.images[img], this.x, this.y);
     };
 
     obj2.draw = function()
@@ -405,10 +410,12 @@ function gameObject(x, y, width, height)
 }
 
 // A sprite object
-function sprite()
+function sprite(im)
 {
 
 }
+
+
 
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()

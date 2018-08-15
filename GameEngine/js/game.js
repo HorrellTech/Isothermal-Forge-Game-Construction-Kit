@@ -13,10 +13,33 @@ const other = -2; // The other instance involved in a collision event, or the ot
 const all = -3; // All instances currently active in the room
 const noone = -4; // No instance at all
 
+// FONT CONSTANTS
+const fa_start = "start";
+const fa_end = "end";
+const fa_left = "left";
+const fa_center = "center";
+const fa_right = "right";
+
+// COLOR CONSTANTS
+const c_red = rgb(255, 0, 0);
+const c_white = rgb(255, 255, 255);
+const c_black = rgb(0, 0, 0);
+const c_ltgray = rgb(176, 176, 176);
+const c_gray = rgb(128, 128, 128);
+const c_dkgray = rgb(64, 64, 64);
+const c_blue = rgb(0, 0, 255);
+const c_lime = rgb(0, 255, 0);
+const c_green = rgb(0, 145, 0);
+const c_yellow = rgb(255, 255, 0);
+const c_orange = rgb(255, 176, 0);
+const c_purple = rgb(255, 0, 255);
+
 gameObjects = []; // The game object list
 context = null;
 keys = []; // Keyboard keys
 animationFrame = null;
+mx = 0; // Base mouse x
+my = 0; // Base mouse y
 
 // GLOBAL VARIABLES
 room_speed = 30;
@@ -32,6 +55,9 @@ mouse_y = 0;
 score = 0;
 health = 100;
 lives = 3;
+instance_count = 0;
+font_size = 12;
+font_style = "Arial";
 
 // Input events
 document.body.addEventListener('keydown', function(e) 
@@ -50,12 +76,8 @@ var textEditor = document.getElementById('tbcode');
 document.body.addEventListener('mousemove', function(e)
 {
     var el = document.getElementById('canvasdiv');
-    mouse_x = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
-    mouse_y = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
-
-    gameObjects.length = 0; // Clear the game objects
-    eval(textEditor.value);
-    gameStart();
+    mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
+    my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
 });
 
 // Scale the canvas relative to it's current size (1 = normal)
@@ -92,7 +114,80 @@ function gameStart()
 
     context = game.context;
 
+    draw_set_font(24, 'Calibri');
+    draw_set_align(fa_start);
+    draw_set_color(c_white);
+
     // Game logic here
+    var object0 = object_add();
+    var object1 = object_add();
+
+    object0.awake = function()
+    {
+        this.orbDir = 0;
+    }
+
+    object0.draw = function()
+    {
+        this.orbDir += 10;
+        draw_set_color(c_red);
+        draw_text(0, 0, "Instance Count: " + instance_count);
+        draw_set_color(c_black);
+        draw_text_outline(0, 0, "Instance Count: " + instance_count);
+        draw_set_color(c_white);
+
+        // Draw things around the cursor
+        draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
+    }
+
+    object1.awake = function()
+    {
+        this.color = rgb(random(255), random(255), random(255));
+        this.depth = 1;
+    }
+
+    object1.draw = function()
+    {
+        var len = 8;
+        draw_set_color(this.color);
+        //draw_circle(this.x, this.y, len, false);
+        //draw_set_color(c_white);
+        draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
+        draw_set_color(c_white);
+
+        this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
+    
+        if(this.x > room_width)
+        {
+            this.x = 0;
+        }
+        if(this.y > room_height)
+        {
+            this.y = 0;
+        }
+        if(this.x < 0)
+        {
+            this.x = room_width;
+        }
+        if(this.y < 0)
+        {
+            this.y = room_height;
+        }
+
+        var dist = point_distance(this.x, this.y, mouse_x, mouse_y);
+        var dir = point_direction(this.x, this.y, mouse_x, mouse_y);
+        if(dist < 32)
+        {
+            this.motion_set(-dir, 3);
+        }
+    }
+
+    instance_create(32, 32, object0);
+
+    for(var i = 0; i < 3500; i += 1)
+    {
+        instance_create(0, 0, object1);
+    }
 }
 
 // The main game area where the canvas will be held
@@ -107,9 +202,6 @@ var game =
         room_height = height;
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
-        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-        //this.frameNo = 0;
-        //this.interval = setInterval(updateGameArea, (1000 / room_speed));
         updateGameArea();
         view_angle = 0;
         },
@@ -405,8 +497,6 @@ function sprite(im)
 
 }
 
-
-
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()
 {
@@ -418,13 +508,16 @@ function sortObjectsByDepth()
         {
             for(var j = 1; j <= i; j += 1)
             {
-                var d1 = this.gameObjects[j].instances[0].depth;
-                var d2 = this.gameObjects[j - 1].instances[0].depth;
-                if(d2 < d1)
+                if(gameObjects[j].instances.length > 0)
                 {
-                    var temp2 = this.gameObjects[j - 1];
-                    this.gameObjects[j - 1] = this.gameObjects[j];
-                    this.gameObjects[j] = temp2;
+                    var d1 = this.gameObjects[j].instances[0].depth;
+                    var d2 = this.gameObjects[j - 1].instances[0].depth;
+                    if(d2 < d1)
+                    {
+                        var temp2 = this.gameObjects[j - 1];
+                        this.gameObjects[j - 1] = this.gameObjects[j];
+                        this.gameObjects[j] = temp2;
+                    }
                 }
             }
         }
@@ -458,28 +551,30 @@ function updateGameArea()
     }
 
     game.clear();
+    var insCount = 0; // InstanceCount
         // This is the main game loop
-        for (var i = 0; i < this.gameObjects.length; i += 1) 
+        for (var i = 0; i < gameObjects.length; i += 1) 
         {
-            if(this.gameObjects[i].instances.length > 0)
+            if(gameObjects[i].instances != null)
             {
-                for(var j = 0; j < this.gameObjects[i].instances.length; j += 1)
+                for(var j = 0; j < gameObjects[i].instances.length; j += 1)
                 {
-                    var ins = this.gameObjects[i].instances[j];
+                    var ins = gameObjects[i].instances[j];
                     if(ins != null && ins.active)
                     {
                         ins.update();
+                        insCount += 1;
                     }
                 }
             }
         }
-        for (var x = 0; x < this.gameObjects.length; x += 1) 
+        for (var x = 0; x < gameObjects.length; x += 1) 
         {
-            if(this.gameObjects[x].instances.length > 0)
+            if(gameObjects[x].instances != null)
             {
-                for(var y = 0; y < this.gameObjects[x].instances.length; y += 1)
+                for(var y = 0; y < gameObjects[x].instances.length; y += 1)
                 {
-                    var ins = this.gameObjects[x].instances[y];
+                    var ins = gameObjects[x].instances[y];
                     if(ins != null && ins.visible && ins.active)
                     {
                         ins.mainDraw();
@@ -488,8 +583,13 @@ function updateGameArea()
             }
         }
 
+        instance_count = insCount;
+
+        mouse_x = mx;
+        mouse_y = my;
+
         // If the view angle has changed, change the canvas angle
-        if(oldViewAngle != view_angle)
+        /*if(oldViewAngle != view_angle)
         {
             context.translate(game.canvas.width / 2, game.canvas.height / 2);
             context.rotate(degtorad(view_angle));
@@ -505,9 +605,15 @@ function updateGameArea()
             game.canvas.width = view_wview;
         }
 
-        view_angle % 360;
+        view_angle % 360;*/
 
         animationFrame = requestAnimationFrame(updateGameArea);
+}
+
+// Gets the number of instances of the given object
+function instance_number(object_id)
+{
+    return(object_id.instances.length);
 }
 
 // If the canvas exists, use it, otherwise create a new one
@@ -553,8 +659,10 @@ function draw_set_color(color)
     context.strokeStyle = color;
 }
 
+// Draw a rectangle as outline or filled
 function draw_rectangle(x1, y1, x2, y2, outline)
 {
+    context.beginPath();
     if(outline)
     {
         context.strokeRect(x1, y1, x2 - x1, y2 - y1);
@@ -563,6 +671,103 @@ function draw_rectangle(x1, y1, x2, y2, outline)
     {
         context.fillRect(x1, y1, x2 - x1, y2 - y1);
     }   
+    context.closePath();
+}
+
+// Draw a rectangle as outline or filled
+function draw_rectangle_color(x1, y1, x2, y2, col1, col2, outline)
+{
+    context.beginPath();
+    var fillStylePrev = context.fillStyle;
+    var strokeStylePrev = context.strokeStyle;
+    var gradient = context.createLinearGradient(x1, y1, x2, y2);
+    gradient.addColorStop(0, col1);
+    gradient.addColorStop(1, col2);
+    if(outline)
+    {
+        context.strokeStyle = gradient;
+        context.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    }
+    else
+    {
+        context.fillStyle = gradient;
+        context.fillRect(x1, y1, x2 - x1, y2 - y1);
+    }   
+    context.strokeStyle = strokeStylePrev;
+    context.fillStyle = fillStylePrev;
+    context.closePath();
+}
+
+// Draw a line from one point to another
+function draw_line(x1, y1, x2, y2)
+{
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.stroke();
+    context.closePath();
+}
+
+// Draw a line from one point to another
+function draw_line_width(x1, y1, x2, y1, width)
+{
+    context.beginPath();
+    context.lineWidth(width);
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.stroke();
+    context.lineWidth(1);
+    context.closePath();
+}
+
+// Set the text font, '30' 'Arial' for example
+function draw_set_font(size, name)
+{
+    context.beginPath();
+    context.font = size.toString() + 'px ' + name;
+    font_size = size;
+    font_style = name;
+    context.closePath();
+}
+
+// Align the text using fa_*
+function draw_set_align(align)
+{
+    context.textAlign = align;
+}
+
+// Draw a text to the screen
+function draw_text(x, y, text)
+{
+    context.fillText(text, x, y + font_size);
+}
+
+// Draw a text to the screen
+function draw_text_outline(x, y, text)
+{
+    context.strokeText(text, x, y + font_size);
+}
+
+// Draw a circle
+function draw_circle(x, y, r, outline)
+{
+    if(outline)
+    {
+        context.beginPath();
+        context.arc(x, y, r, 0, 2 * pi);
+        context.closePath();
+        context.stroke();
+    }
+    else
+    {
+        var oldLineWidth = context.lineWidth;
+        context.lineWidth = 0;
+        context.beginPath();
+        context.arc(x, y, r, 0, 2 * pi);
+        context.closePath();
+        context.fill();
+        context.lineWidth = oldLineWidth;
+    }
 }
 
 // MATH STUFF
@@ -636,7 +841,9 @@ function snap(position, grid_size)
 // Return the distance between 2 points
 function point_distance(x1, y1, x2, y2)
 {
-    return (Math.sqrt(Math.pow(x2 - x2, 2) + Math.pow(y2 - y1, 2)));
+    var a = x1 - x2;
+    var b = y1 - y2;
+    return (Math.sqrt(a * a + b * b));
 }
 
 // Return the direction from one point to another
@@ -711,8 +918,5 @@ function real(val)
 // Execute javascript code from a string
 function execute_string(string)
 {
-    var script = document.createElement("script");
-    script.onload = script.onerror = function(){ this.remove(); };
-    script.src = "data:text/plain;base64," + btoa(source);
-    document.body.appendChild(script);
+    eval(string);
 }

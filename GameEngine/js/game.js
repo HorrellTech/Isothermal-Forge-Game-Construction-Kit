@@ -1,7 +1,8 @@
-(function() {
+//(function() {
     var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
     window.requestAnimationFrame = requestAnimationFrame;
-})();
+//})();
+var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 // CONSTANTS
 const pi = Math.PI; // PI
@@ -15,6 +16,7 @@ const noone = -4; // No instance at all
 gameObjects = []; // The game object list
 context = null;
 keys = []; // Keyboard keys
+animationFrame = null;
 
 // GLOBAL VARIABLES
 room_speed = 30;
@@ -24,6 +26,7 @@ view_xview = 0;
 view_yview = 0;
 view_wview = 640;
 view_hview = 480;
+view_angle = 0;
 mouse_x = 0;
 mouse_y = 0;
 score = 0;
@@ -41,10 +44,18 @@ document.body.addEventListener('keyup', function(e)
     keys[e.keyCode] = false;
 });
 
+
+var textEditor = document.getElementById('tbcode');
+
 document.body.addEventListener('mousemove', function(e)
 {
-    mouse_x = e.x - game.canvas.offsetLeft;
-    mouse_y = e.y - game.canvas.offsetTop;
+    var el = document.getElementById('canvasdiv');
+    mouse_x = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
+    mouse_y = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
+
+    gameObjects.length = 0; // Clear the game objects
+    eval(textEditor.value);
+    gameStart();
 });
 
 // Scale the canvas relative to it's current size (1 = normal)
@@ -76,78 +87,12 @@ resm = new resourceManager();
 // Start the game
 function gameStart()
 {
+    cancelAnimationFrame(animationFrame);
     game.start(640, 480, '2d');
 
     context = game.context;
 
-    // Test game object
-    var obj = object_add();
-    obj.width = 32;
-    obj.height = 32;
-    
-    var obj2 = object_add();
-    obj2.width = 32;
-    obj2.height = 32;
-
-    obj.draw = function()
-    {
-        this.motion_set(this.direction + random_range(-10, 10), random_range(10, 10));
-        this.x = mouse_x;
-        if(this.x > room_width)
-        {
-            this.x = -31;
-        }
-        if(this.x + this.width < 0)
-        {
-            this.x = room_width;
-        }
-        if(this.y > room_height)
-        {
-            this.y = -31;
-        }
-        if(this.y + this.height < 0)
-        {
-            this.y = room_height;
-        }
-        context.fillStyle = rgb(255, 0, 0);
-        context.fillRect(this.x, this.y, this.width, this.height);
-        //context.drawImage(rMan.images[img], this.x, this.y);
-    };
-
-    obj2.draw = function()
-    {
-        this.motion_set(this.direction + random_range(-10, 10), random_range(0, 3));
-        this.depth = 1;
-        
-        if(this.x > room_width)
-        {
-            this.x = -31;
-        }
-        if(this.x + this.width < 0)
-        {
-            this.x = room_width;
-        }
-        if(this.y > room_height)
-        {
-            this.y = -31;
-        }
-        if(this.y + this.height < 0)
-        {
-            this.y = room_height;
-        }
-        context.fillStyle = rgb(0, 255, 0);
-        context.fillRect(this.x - 16, this.y - 16, this.width, this.height);
-    };
-
-    for(var i = 0; i < 10; i += 1)
-    {
-        instance_create(random(room_width), random(room_height), obj);
-    }
-
-    for(var i = 0; i < 100; i += 1)
-    {
-        instance_create(random(room_width), random(room_height), obj2);
-    }
+    // Game logic here
 }
 
 // The main game area where the canvas will be held
@@ -162,10 +107,11 @@ var game =
         room_height = height;
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
-        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        //document.body.insertBefore(this.canvas, document.body.childNodes[0]);
         //this.frameNo = 0;
         //this.interval = setInterval(updateGameArea, (1000 / room_speed));
         updateGameArea();
+        view_angle = 0;
         },
     clear : function() {
         if(this.cont == '2d')
@@ -502,6 +448,9 @@ function objectHasSortedDepth()
 // Main update loop
 function updateGameArea()
 {
+    var oldViewAngle = view_angle; // Store the view angle
+    var oldViewW = view_wview;
+    var oldViewH = view_hview;
     sortObjectsByDepth();
     if(context != game.context)
     {
@@ -512,27 +461,53 @@ function updateGameArea()
         // This is the main game loop
         for (var i = 0; i < this.gameObjects.length; i += 1) 
         {
-            for(var j = 0; j < this.gameObjects[i].instances.length; j += 1)
+            if(this.gameObjects[i].instances.length > 0)
             {
-                var ins = this.gameObjects[i].instances[j];
-                if(ins != null && ins.active)
+                for(var j = 0; j < this.gameObjects[i].instances.length; j += 1)
                 {
-                    ins.update();
+                    var ins = this.gameObjects[i].instances[j];
+                    if(ins != null && ins.active)
+                    {
+                        ins.update();
+                    }
                 }
             }
         }
         for (var x = 0; x < this.gameObjects.length; x += 1) 
         {
-            for(var y = 0; y < this.gameObjects[x].instances.length; y += 1)
+            if(this.gameObjects[x].instances.length > 0)
             {
-                var ins = this.gameObjects[x].instances[y];
-                if(ins != null && ins.visible && ins.active)
+                for(var y = 0; y < this.gameObjects[x].instances.length; y += 1)
                 {
-                    ins.mainDraw();
+                    var ins = this.gameObjects[x].instances[y];
+                    if(ins != null && ins.visible && ins.active)
+                    {
+                        ins.mainDraw();
+                    }
                 }
             }
         }
-        requestAnimationFrame(updateGameArea);
+
+        // If the view angle has changed, change the canvas angle
+        if(oldViewAngle != view_angle)
+        {
+            context.translate(game.canvas.width / 2, game.canvas.height / 2);
+            context.rotate(degtorad(view_angle));
+            context.translate(-game.canvas.width / 2, -game.canvas.height / 2);
+        }
+
+        if(oldViewH != view_hview)
+        {
+            game.canvas.height = view_hview;
+        }
+        if(oldViewW != view_wview)
+        {
+            game.canvas.width = view_wview;
+        }
+
+        view_angle % 360;
+
+        animationFrame = requestAnimationFrame(updateGameArea);
 }
 
 // If the canvas exists, use it, otherwise create a new one
@@ -540,17 +515,13 @@ function createCanvas()
 {
     var canv = document.getElementById("canvas");
 
-    if(canv != null)
+    if(canv == null)
     {
-        return(canv);
+        canv = document.createElement('canvas');
     }
-    else
-    {
-        canv = (document.createElement("canvas"));
-        canv.oncontextmenu = function(e){ return false; }; // Disable the context menu on right click
+    canv.oncontextmenu = function(e){ return false; };
 
-        return(canv);
-    }
+    return(canv);
 }
 
 // Every timer tick
@@ -575,6 +546,24 @@ function rgb(r, g, b)
     return ["rgb(",r,",",g,",",b,")"].join("");
 }
 
+// Set the drawing color
+function draw_set_color(color)
+{
+    context.fillStyle = color;
+    context.strokeStyle = color;
+}
+
+function draw_rectangle(x1, y1, x2, y2, outline)
+{
+    if(outline)
+    {
+        context.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    }
+    else
+    {
+        context.fillRect(x1, y1, x2 - x1, y2 - y1);
+    }   
+}
 
 // MATH STUFF
 

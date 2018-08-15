@@ -12,24 +12,23 @@ const other = -2; // The other instance involved in a collision event, or the ot
 const all = -3; // All instances currently active in the room
 const noone = -4; // No instance at all
 
-var gameObjects = []; // The game object list
-var context;
-var dt;
-var keys = []; // Keyboard keys
+gameObjects = []; // The game object list
+context = null;
+keys = []; // Keyboard keys
 
 // GLOBAL VARIABLES
-var room_speed;
-var room_width;
-var room_height;
-var view_xview;
-var view_yview;
-var view_wview;
-var view_hview;
-var mouse_x;
-var mouse_y;
-var score;
-var health;
-var lives;
+room_speed = 30;
+room_width = 640;
+room_height = 480;
+view_xview = 0;
+view_yview = 0;
+view_wview = 640;
+view_hview = 480;
+mouse_x = 0;
+mouse_y = 0;
+score = 0;
+health = 100;
+lives = 3;
 
 // Input events
 document.body.addEventListener('keydown', function(e) 
@@ -48,19 +47,38 @@ document.body.addEventListener('mousemove', function(e)
     mouse_y = e.y - game.canvas.offsetTop;
 });
 
+// Scale the canvas relative to it's current size (1 = normal)
+function scaleCanvas(xscale, yscale)
+{
+    if(context != null)
+    {
+        game.canvas.width *= xscale;
+        game.canvas.height *= yscale;
+        context.scale(xscale, yscale);
+    }
+}
+
+// Keeps track of the resources loaded in the game
+function resourceManager()
+{
+    var images = [];
+    var sounds = [];
+
+    loadImage = function(src, callback) {
+        var img = document.createElement('img');
+        img.addEventListener('load', function() { callback(img); } , false);
+        img.src = src;
+     }
+}
+
+resm = new resourceManager();
+
 // Start the game
 function gameStart()
 {
-    room_speed = 60;
     game.start(640, 480, '2d');
-    score = 0;
-    health = 100;
-    lives = 3;
 
     context = game.context;
-
-   // var rMan = new resourceManager();
-    
 
     // Test game object
     var obj = object_add();

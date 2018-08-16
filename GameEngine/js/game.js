@@ -43,6 +43,8 @@ animationFrame = null; // How we will talk to the animation frame requests
 mx = 0; // Base mouse x
 my = 0; // Base mouse y
 lastTick = 0; // Last time the frame ticked
+font_size = 12;
+font_style = "Arial";
 
 // GLOBAL VARIABLES
 room_speed = 30;
@@ -61,8 +63,6 @@ health = 100;
 lives = 3;
 instance_count = 0;
 object_count = 0;
-font_size = 12;
-font_style = "Arial";
 
 // Input events
 document.body.addEventListener('keydown', function(e) 
@@ -153,10 +153,15 @@ function gameStart()
         this.depth = 1;
         this.width = 16;
         this.height = 16;
+        this.direction = irandom(360);
     }
 
     object1.draw = function()
     {
+        if(this.collision_with(object1) != noone)
+        {
+            this.instance_destroy();
+        }
         var len = 8;
         //if(this.within_view())
         {
@@ -206,9 +211,9 @@ function gameStart()
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 1500; i += 1)
+    for(var i = 0; i < 500; i += 1)
     {
-        var th = instance_create(random(room_width), random(room_height), object1);
+        instance_create(random(room_width), random(room_height), object1);
     }
 }
 
@@ -556,6 +561,47 @@ function gameObject(x, y, width, height)
     this.mouse_over = function()
     {
         return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
+    }
+
+    this.collision_with = function(object)
+    {
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            if(object.instances[i] != this)
+            {
+                if(checkCollision(object.instances[i]))
+                {
+                    alert("");
+                    return(object.instances[i]);
+                }
+            }
+        }
+        return(noone);
+    }
+
+    // Check collision with a certain object, and return the other object collided with
+    this.checkCollision = function(object)
+    {
+        alert("");
+        /*var ob = object;
+        var obleft = ob.x;
+        var obtop = ob.y;
+        var obright = ob.x + ob.width;
+        var obbottom = ob.y + ob.height;
+
+        var left = this.x;
+        var top = this.y;
+        var right = this.x + this.width;
+        var bottom = this.y + this.height;*/
+
+        /*if(obleft > right || obright < left || obtop > bottom || obbottom < top)
+          {
+            return(true);
+          }
+          else
+          {
+              return(false);
+          }*/
     }
 }
 
@@ -945,6 +991,18 @@ function lengthdir_y(length, direction)
 function lerp(from, to, amount)
 {
     return (from + amount * (to - from)); 
+}
+
+// Get the max value from the array
+function max(...values)
+{
+    return (Math.max(values));
+}
+
+// Get the min value from the array
+function min(...values)
+{
+    return (Math.min(values));
 }
 
 // Returns a random floating point from 1 to max value

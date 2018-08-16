@@ -5,6 +5,7 @@
 var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 // CONSTANTS
+const canvasId = 'canvas';
 const pi = Math.PI; // PI
 const t = 1; // True
 const f = 0; // False
@@ -70,9 +71,6 @@ document.body.addEventListener('keyup', function(e)
     keys[e.keyCode] = false;
 });
 
-
-var textEditor = document.getElementById('tbcode');
-
 document.body.addEventListener('mousemove', function(e)
 {
     var el = document.getElementById('canvasdiv');
@@ -137,6 +135,7 @@ function gameStart()
         draw_set_color(c_white);
 
         view_xview += 1;
+        //view_yview += 1;
 
         // Draw things around the cursor
         draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
@@ -644,11 +643,11 @@ function instance_number(object_id)
 // If the canvas exists, use it, otherwise create a new one
 function createCanvas()
 {
-    var canv = document.getElementById("canvas");
+    var canv = document.getElementById(canvasId);
 
     if(canv == null)
     {
-        canv = document.createElement('canvas');
+        canv = document.createElement(canvasId);
     }
     canv.oncontextmenu = function(e){ return false; };
 
@@ -690,11 +689,11 @@ function draw_rectangle(x1, y1, x2, y2, outline)
     context.beginPath();
     if(outline)
     {
-        context.strokeRect(x1 - view_yview, y1 - view_xview, x2 - x1, y2 - y1);
+        context.strokeRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
     }
     else
     {
-        context.fillRect(x1 - view_yview, y1 - view_xview, x2 - x1, y2 - y1);
+        context.fillRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
     }   
     context.closePath();
 }

@@ -47,8 +47,8 @@ room_width = 640;
 room_height = 480;
 view_xview = 0;
 view_yview = 0;
-view_wview = 640;
-view_hview = 480;
+view_wview = room_width;
+view_hview = room_height;
 view_angle = 0;
 mouse_x = 0;
 mouse_y = 0;
@@ -110,7 +110,7 @@ resm = new resourceManager();
 function gameStart()
 {
     cancelAnimationFrame(animationFrame);
-    game.start(640, 480, '2d');
+    game.start(view_wview, view_hview, '2d');
 
     context = game.context;
 
@@ -131,13 +131,15 @@ function gameStart()
     {
         this.orbDir += 10;
         draw_set_color(c_red);
-        draw_text(0, 0, "Instance Count: " + instance_count);
+        draw_text(view_xview, view_yview, "Instance Count: " + instance_count);
         draw_set_color(c_black);
-        draw_text_outline(0, 0, "Instance Count: " + instance_count);
+        draw_text_outline(view_xview, view_yview, "Instance Count: " + instance_count);
         draw_set_color(c_white);
 
+        view_xview += 1;
+
         // Draw things around the cursor
-        //draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
+        draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
     }
 
     object1.awake = function()
@@ -157,26 +159,26 @@ function gameStart()
         //draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
         draw_set_color(c_white);
 
-        this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
+        //this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
     
         if(this.x > room_width)
         {
-            this.x = 0;
+            //this.x = 0;
             //this.move_bounce(false, false, true);
         }
         if(this.y > room_height)
         {
-            this.y = 0;
+            //this.y = 0;
             //this.move_bounce(false, false, true);
         }
         if(this.x < 0)
         {
-            this.x = room_width;
+            //this.x = room_width;
             //this.move_bounce(false, false, true);
         }
         if(this.y < 0)
         {
-            this.y = room_height;
+            //this.y = room_height;
             //this.move_bounce(false, false, true);
         }
 
@@ -192,7 +194,7 @@ function gameStart()
 
     for(var i = 0; i < 4500; i += 1)
     {
-        var th = instance_create(room_width / 2, room_height / 2, object1);
+        var th = instance_create(random(room_width), random(room_height), object1);
     }
 }
 
@@ -608,8 +610,8 @@ function updateGameArea()
 
         instance_count = insCount;
 
-        mouse_x = mx;
-        mouse_y = my;
+        mouse_x = mx + view_xview;
+        mouse_y = my + view_yview;
 
         // If the view angle has changed, change the canvas angle
         /*if(oldViewAngle != view_angle)
@@ -688,11 +690,11 @@ function draw_rectangle(x1, y1, x2, y2, outline)
     context.beginPath();
     if(outline)
     {
-        context.strokeRect(x1, y1, x2 - x1, y2 - y1);
+        context.strokeRect(x1 - view_yview, y1 - view_xview, x2 - x1, y2 - y1);
     }
     else
     {
-        context.fillRect(x1, y1, x2 - x1, y2 - y1);
+        context.fillRect(x1 - view_yview, y1 - view_xview, x2 - x1, y2 - y1);
     }   
     context.closePath();
 }
@@ -725,8 +727,8 @@ function draw_rectangle_color(x1, y1, x2, y2, col1, col2, outline)
 function draw_line(x1, y1, x2, y2)
 {
     context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
+    context.moveTo(x1 - view_xview, y1 - view_yview);
+    context.lineTo(x2 - view_xview, y2 - view_yview);
     context.stroke();
     context.closePath();
 }
@@ -736,8 +738,8 @@ function draw_line_width(x1, y1, x2, y2, width)
 {
     context.beginPath();
     context.lineWidth(width);
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
+    context.moveTo(x1 - view_xview, y1 - view_yview);
+    context.lineTo(x2 - view_xview, y2 - view_yview);
     context.stroke();
     context.lineWidth(1);
     context.closePath();
@@ -762,13 +764,13 @@ function draw_set_align(align)
 // Draw a text to the screen
 function draw_text(x, y, text)
 {
-    context.fillText(text, x, y + font_size);
+    context.fillText(text, x - view_xview, y - view_yview + font_size);
 }
 
 // Draw a text to the screen
 function draw_text_outline(x, y, text)
 {
-    context.strokeText(text, x, y + font_size);
+    context.strokeText(text, x - view_xview, y - view_yview + font_size);
 }
 
 // Draw a circle
@@ -777,7 +779,7 @@ function draw_circle(x, y, r, outline)
     if(outline)
     {
         context.beginPath();
-        context.arc(x, y, r, 0, 2 * pi);
+        context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
         context.closePath();
         context.stroke();
     }
@@ -786,7 +788,7 @@ function draw_circle(x, y, r, outline)
         var oldLineWidth = context.lineWidth;
         context.lineWidth = 0;
         context.beginPath();
-        context.arc(x, y, r, 0, 2 * pi);
+        context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
         context.closePath();
         context.fill();
         context.lineWidth = oldLineWidth;
@@ -864,16 +866,16 @@ function snap(position, grid_size)
 // Return the distance between 2 points
 function point_distance(x1, y1, x2, y2)
 {
-    var a = x1 - x2;
-    var b = y1 - y2;
+    var a = (x1) - (x2);
+    var b = (y1) - (y2);
     return (Math.sqrt(a * a + b * b));
 }
 
 // Return the direction from one point to another
 function point_direction(x1, y1, x2, y2)
 {
-    var xdiff = x2 - x1;
-    var ydiff = y2 - y1;
+    var xdiff = (x2) - x1;
+    var ydiff = (y2) - y1;
 
     return (-(Math.atan2(ydiff, xdiff) * 180.0 / Math.PI));
 }

@@ -35,17 +35,20 @@ const c_yellow = rgb(255, 255, 0);
 const c_orange = rgb(255, 176, 0);
 const c_purple = rgb(255, 0, 255);
 
+// HIDDEN GLOBAL VARIABLES
 gameObjects = []; // The game object list
 context = null;
 keys = []; // Keyboard keys
-animationFrame = null;
+animationFrame = null; // How we will talk to the animation frame requests
 mx = 0; // Base mouse x
 my = 0; // Base mouse y
+lastTick = 0; // Last time the frame ticked
 
 // GLOBAL VARIABLES
 room_speed = 30;
 room_width = 640;
 room_height = 480;
+fps = 0;
 view_xview = 0;
 view_yview = 0;
 view_wview = room_width;
@@ -110,6 +113,7 @@ function gameStart()
 {
     cancelAnimationFrame(animationFrame);
     game.start(view_wview, view_hview, '2d');
+    lastTick = new Date().getTime();
 
     context = game.context;
 
@@ -130,9 +134,9 @@ function gameStart()
     {
         this.orbDir += 10;
         draw_set_color(c_red);
-        draw_text(view_xview, view_yview, "Instance Count: " + instance_count);
+        draw_text(view_xview, view_yview, "Instance Count: " + instance_count + "; FPS: " + string(fps));
         draw_set_color(c_black);
-        draw_text_outline(view_xview, view_yview, "Instance Count: " + instance_count);
+        //draw_text_outline(view_xview, view_yview, "Instance Count: " + instance_count);
         draw_set_color(c_white);
 
         //view_xview += 1;
@@ -614,6 +618,11 @@ function objectHasSortedDepth()
 // Main update loop
 function updateGameArea()
 {
+    // FPS CALCULATION
+    var delta = (new Date().getTime() - lastTick) / 1000;
+    lastTick = new Date().getTime();
+    fps = 1 / delta;
+
     var oldViewAngle = view_angle; // Store the view angle
     var oldViewW = view_wview;
     var oldViewH = view_hview;

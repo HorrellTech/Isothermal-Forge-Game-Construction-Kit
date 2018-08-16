@@ -210,15 +210,6 @@ function gameStart()
     {
         var th = instance_create(random(room_width), random(room_height), object1);
     }
-
-    var bb = instance_create(32, 32, object1);
-    bb.depth = - 10;
-    bb.loop = function()
-    {
-        view_xview = this.x - view_wview / 2;
-        view_yview = this.y - view_hview / 2;
-        this.color = c_black;
-    };
 }
 
 // The main game area where the canvas will be held
@@ -1002,4 +993,16 @@ function real(val)
 function execute_string(string)
 {
     eval(string);
+}
+
+// Returns the width of the screen
+function screen_get_width()
+{
+    return (screen.width);
+}
+
+// Returns the height of the screen
+function screen_get_height()
+{
+    return (screen.height);
 }

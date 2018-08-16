@@ -57,6 +57,7 @@ score = 0;
 health = 100;
 lives = 3;
 instance_count = 0;
+object_count = 0;
 font_size = 12;
 font_style = "Arial";
 
@@ -134,7 +135,7 @@ function gameStart()
         draw_text_outline(view_xview, view_yview, "Instance Count: " + instance_count);
         draw_set_color(c_white);
 
-        view_xview += 1;
+        //view_xview += 1;
         //view_yview += 1;
 
         // Draw things around the cursor
@@ -146,39 +147,49 @@ function gameStart()
         var col = irandom_range(0, 255);
         this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
         this.depth = 1;
+        this.width = 16;
+        this.height = 16;
     }
 
     object1.draw = function()
     {
         var len = 8;
-        draw_set_color(this.color);
-        //draw_circle(this.x, this.y, len, false);
-        draw_rectangle(this.x - len, this.y - len, this.x + len, this.y + len, false);
-        draw_set_color(c_white);
-        //draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
-        draw_set_color(c_white);
+        //if(this.within_view())
+        {
+            draw_set_color(this.color);
+            draw_circle(this.x, this.y, len, false);
+            //draw_rectangle(this.x - len, this.y - len, this.x + len, this.y + len, false);
+            draw_set_color(c_white);
+            draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
+            draw_set_color(c_white);
+        }
 
-        //this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
+        if(this.mouse_over())
+        {
+            this.instance_destroy();
+        }
+
+        this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
     
         if(this.x > room_width)
         {
             //this.x = 0;
-            //this.move_bounce(false, false, true);
+            this.move_bounce(true, false, true);
         }
         if(this.y > room_height)
         {
             //this.y = 0;
-            //this.move_bounce(false, false, true);
+            this.move_bounce(false, true, true);
         }
         if(this.x < 0)
         {
             //this.x = room_width;
-            //this.move_bounce(false, false, true);
+            this.move_bounce(true, false, true);
         }
         if(this.y < 0)
         {
             //this.y = room_height;
-            //this.move_bounce(false, false, true);
+            this.move_bounce(false, true, true);
         }
 
         var dist = point_distance(this.x, this.y, mouse_x, mouse_y);
@@ -187,14 +198,23 @@ function gameStart()
         {
             this.motion_set(-dir, 3);
         }
-    }
+    };
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 4500; i += 1)
+    for(var i = 0; i < 1500; i += 1)
     {
         var th = instance_create(random(room_width), random(room_height), object1);
     }
+
+    var bb = instance_create(32, 32, object1);
+    bb.depth = - 10;
+    bb.loop = function()
+    {
+        view_xview = this.x - view_wview / 2;
+        view_yview = this.y - view_hview / 2;
+        this.color = c_black;
+    };
 }
 
 // The main game area where the canvas will be held
@@ -448,7 +468,7 @@ function gameObject(x, y, width, height)
     // Check if there are inactive instaces waiting to be removed, and if so, remove them
     this.clean_up_instances = function()
     {
-        for(var i = 0; i < instances.length; i += 1)
+        for(var i = 0; i < this.instances.length; i += 1)
         {
             var ins = this.instances[i];
             if(!ins.active)
@@ -466,7 +486,7 @@ function gameObject(x, y, width, height)
     {
         this.active = false;
         this.need_removed = true;
-        object_id.clean_up_instances();
+        //object_id.clean_up_instances(); // Make the parent object clean up resources
     };
 
     // Add motion towards a direction
@@ -502,17 +522,46 @@ function gameObject(x, y, width, height)
     {
         if(hbounce)
         {
-            this.hspeed *= -1;
+            if(dirbounce)
+            {
+                this.direction = 2 * 0 - this.direction - 180;
+            }
+            else
+            {
+                this.hspeed *= -1;
+            }
         }
         if(vbounce)
         {
-            this.vspeed *= -1;
-        }
-        if(dirbounce)
-        {
-            this.direction = 2 * 0 - this.direction - 180;
+            if(dirbounce)
+            {
+                this.direction = 2 * 90 - this.direction - 180;
+            }
+            else
+            {
+                this.vspeed *= -1;
+            }
         }
     };
+
+    // DRAWING
+
+    // Check if the object is within the view bounds
+    this.within_view = function()
+    {
+        var x1, y1, x2, y2;
+        x1 = this.x;
+        y1 = this.y;
+        x2 = this.x + this.width;
+        y2 = this.y + this.height;
+        return (x2 > 0 && y2 > 0 && x1 < view_xview + view_wview && y1 < view_yview + view_hview);
+    }
+
+    // Check if the mouse is within the instances bounds
+    this.mouse_over = function()
+    {
+        return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
+    }
 }
 
 // A sprite object
@@ -608,6 +657,7 @@ function updateGameArea()
         }
 
         instance_count = insCount;
+        object_count = gameObjects.length;
 
         mouse_x = mx + view_xview;
         mouse_y = my + view_yview;

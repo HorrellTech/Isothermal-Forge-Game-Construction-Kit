@@ -137,12 +137,13 @@ function gameStart()
         draw_set_color(c_white);
 
         // Draw things around the cursor
-        draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
+        //draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
     }
 
     object1.awake = function()
     {
-        this.color = rgb(random(255), random(255), random(255));
+        var col = irandom_range(0, 255);
+        this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
         this.depth = 1;
     }
 
@@ -151,8 +152,9 @@ function gameStart()
         var len = 8;
         draw_set_color(this.color);
         //draw_circle(this.x, this.y, len, false);
-        //draw_set_color(c_white);
-        draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
+        draw_rectangle(this.x - len, this.y - len, this.x + len, this.y + len, false);
+        draw_set_color(c_white);
+        //draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
         draw_set_color(c_white);
 
         this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
@@ -160,23 +162,27 @@ function gameStart()
         if(this.x > room_width)
         {
             this.x = 0;
+            //this.move_bounce(false, false, true);
         }
         if(this.y > room_height)
         {
             this.y = 0;
+            //this.move_bounce(false, false, true);
         }
         if(this.x < 0)
         {
             this.x = room_width;
+            //this.move_bounce(false, false, true);
         }
         if(this.y < 0)
         {
             this.y = room_height;
+            //this.move_bounce(false, false, true);
         }
 
         var dist = point_distance(this.x, this.y, mouse_x, mouse_y);
         var dir = point_direction(this.x, this.y, mouse_x, mouse_y);
-        if(dist < 32)
+        if(dist < 48)
         {
             this.motion_set(-dir, 3);
         }
@@ -184,9 +190,9 @@ function gameStart()
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 3500; i += 1)
+    for(var i = 0; i < 4500; i += 1)
     {
-        instance_create(0, 0, object1);
+        var th = instance_create(room_width / 2, room_height / 2, object1);
     }
 }
 
@@ -489,6 +495,23 @@ function gameObject(x, y, width, height)
         this.x = snap(this.x, hsnap);
         this.y = snap(this.y, vsnap);
     };
+
+    // Reverse the directions, takes in booleans
+    this.move_bounce = function(hbounce, vbounce, dirbounce)
+    {
+        if(hbounce)
+        {
+            this.hspeed *= -1;
+        }
+        if(vbounce)
+        {
+            this.vspeed *= -1;
+        }
+        if(dirbounce)
+        {
+            this.direction = 2 * 0 - this.direction - 180;
+        }
+    };
 }
 
 // A sprite object
@@ -709,7 +732,7 @@ function draw_line(x1, y1, x2, y2)
 }
 
 // Draw a line from one point to another
-function draw_line_width(x1, y1, x2, y1, width)
+function draw_line_width(x1, y1, x2, y2, width)
 {
     context.beginPath();
     context.lineWidth(width);

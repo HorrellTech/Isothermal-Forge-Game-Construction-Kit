@@ -158,10 +158,10 @@ function gameStart()
 
     object1.draw = function()
     {
-        if(this.collision_with(object1) != noone)
+        /*if(this.collision_with(object1) != noone)
         {
             this.instance_destroy();
-        }
+        }*/
         var len = 8;
         //if(this.within_view())
         {
@@ -211,7 +211,7 @@ function gameStart()
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 500; i += 1)
+    for(var i = 0; i < 2000; i += 1)
     {
         instance_create(random(room_width), random(room_height), object1);
     }
@@ -569,9 +569,8 @@ function gameObject(x, y, width, height)
         {
             if(object.instances[i] != this)
             {
-                if(checkCollision(object.instances[i]))
+                if(this.checkCollision(object.instances[i]))
                 {
-                    alert("");
                     return(object.instances[i]);
                 }
             }
@@ -582,8 +581,7 @@ function gameObject(x, y, width, height)
     // Check collision with a certain object, and return the other object collided with
     this.checkCollision = function(object)
     {
-        alert("");
-        /*var ob = object;
+        var ob = object;
         var obleft = ob.x;
         var obtop = ob.y;
         var obright = ob.x + ob.width;
@@ -592,16 +590,16 @@ function gameObject(x, y, width, height)
         var left = this.x;
         var top = this.y;
         var right = this.x + this.width;
-        var bottom = this.y + this.height;*/
+        var bottom = this.y + this.height;
 
-        /*if(obleft > right || obright < left || obtop > bottom || obbottom < top)
+        if(obleft > right || obright < left || obtop > bottom || obbottom < top)
           {
             return(true);
           }
           else
           {
               return(false);
-          }*/
+          }
     }
 }
 

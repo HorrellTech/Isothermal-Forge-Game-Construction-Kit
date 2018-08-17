@@ -158,10 +158,11 @@ function gameStart()
 
     object1.draw = function()
     {
-        /*if(this.collision_with(object1) != noone)
+        if(this.collision_with(object1) != noone)
         {
-            this.instance_destroy();
-        }*/
+            //this.instance_destroy();
+            this.color = c_black;
+        }
         var len = 8;
         //if(this.within_view())
         {
@@ -175,30 +176,30 @@ function gameStart()
 
         if(this.mouse_over())
         {
-            this.instance_destroy();
+            this.color = c_black;
         }
 
         this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
     
         if(this.x > room_width)
         {
-            //this.x = 0;
-            this.move_bounce(true, false, true);
+            this.x = 0;
+            //this.move_bounce(true, false, true);
         }
         if(this.y > room_height)
         {
-            //this.y = 0;
-            this.move_bounce(false, true, true);
+            this.y = 0;
+            //this.move_bounce(false, true, true);
         }
         if(this.x < 0)
         {
-            //this.x = room_width;
-            this.move_bounce(true, false, true);
+            this.x = room_width;
+            //this.move_bounce(true, false, true);
         }
         if(this.y < 0)
         {
-            //this.y = room_height;
-            this.move_bounce(false, true, true);
+            this.y = room_height;
+            //this.move_bounce(false, true, true);
         }
 
         var dist = point_distance(this.x, this.y, mouse_x, mouse_y);
@@ -211,7 +212,7 @@ function gameStart()
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 2000; i += 1)
+    for(var i = 0; i < 20; i += 1)
     {
         instance_create(random(room_width), random(room_height), object1);
     }
@@ -456,7 +457,7 @@ function gameObject(x, y, width, height)
         temp.update = this.update;
         temp.draw = this.draw;
         temp.object_id = this;
-        temp.id = this.id + 1;
+        temp.id = this.id;
 
         this.instances.push(temp);
 
@@ -563,11 +564,27 @@ function gameObject(x, y, width, height)
         return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
     }
 
+
+    this.collision_circle = function(object)
+    {
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            if(object.instances[i].speed < this.id)
+            {
+                if(this.checkCollision(object.instances[i]))
+                {
+                    return(object.instances[i]);
+                }
+            }
+        }
+        return(noone);
+    }
+
     this.collision_with = function(object)
     {
         for(var i = 0; i < object.instances.length; i += 1)
         {
-            if(object.instances[i] != this)
+            if(this.id != object.instances[i].id)
             {
                 if(this.checkCollision(object.instances[i]))
                 {

@@ -144,6 +144,7 @@ function gameStart()
 
         // Draw things around the cursor
         draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
+        this.depth = -9999;
     }
 
     object1.awake = function()
@@ -158,19 +159,14 @@ function gameStart()
 
     object1.draw = function()
     {
-        if(this.collision_with(object1) != noone)
-        {
-            //this.instance_destroy();
-            this.color = c_black;
-        }
         var len = 8;
         //if(this.within_view())
         {
             draw_set_color(this.color);
             draw_circle(this.x, this.y, len, false);
-            //draw_rectangle(this.x - len, this.y - len, this.x + len, this.y + len, false);
+            //draw_rectangle(this.x, this.y, this.x + this.width, this.y + this.height, false);
             draw_set_color(c_white);
-            draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction))
+            draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction));
             draw_set_color(c_white);
         }
 
@@ -208,11 +204,35 @@ function gameStart()
         {
             this.motion_set(-dir, 3);
         }
+
+        //draw_text(this.x, this.y, string(this.id));
+
+        var col = this.collision_with(object1);
+        if(col != noone)
+        {
+            //this.instance_destroy();
+            if(col.id > this.id)
+            {
+                this.color = col.color;
+            }
+            //draw_text(this.x, this.y - 32, "colliding with: " + string(col.id));
+        }
+
+        var near = this.instance_nearest(this.x, this.y, object1);
+        if(near != noone)
+        {
+            draw_set_color(this.color);
+            //draw_line(this.x, this.y, near.x, near.y);
+            draw_set_color(c_white);
+        }
+        //draw_text(this.x, this.y - 64, "nearest: " + string(near.id));
+
+        this.depth = -this.y;
     };
 
     instance_create(32, 32, object0);
 
-    for(var i = 0; i < 20; i += 1)
+    for(var i = 0; i < 500; i += 1)
     {
         instance_create(random(room_width), random(room_height), object1);
     }
@@ -271,6 +291,7 @@ function object_add()
 function gameObject(x, y, width, height) 
 {
     this.instances = [];
+    this.isParent = true;
     this.object_id = noone;
     this.id = 0;
     this.need_removed = false;
@@ -287,10 +308,6 @@ function gameObject(x, y, width, height)
     this.xprevious = x;
     this.yprevious = y;
     this.depth = 0;
-    this.bbox_left = x;
-    this.bbox_top = y;
-    this.bbox_right = x + width;
-    this.bbox_bottom = y + height;
     this.width = width;
     this.height = height;
     this.hspeed = 0;
@@ -458,6 +475,7 @@ function gameObject(x, y, width, height)
         temp.draw = this.draw;
         temp.object_id = this;
         temp.id = this.id;
+        temp.isParent = false;
 
         this.instances.push(temp);
 
@@ -564,61 +582,73 @@ function gameObject(x, y, width, height)
         return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
     }
 
-
-    this.collision_circle = function(object)
-    {
-        for(var i = 0; i < object.instances.length; i += 1)
-        {
-            if(object.instances[i].speed < this.id)
-            {
-                if(this.checkCollision(object.instances[i]))
-                {
-                    return(object.instances[i]);
-                }
-            }
-        }
-        return(noone);
-    }
-
+    // Detect collision with another instance of object type
     this.collision_with = function(object)
     {
-        for(var i = 0; i < object.instances.length; i += 1)
+        if(!this.isParent)
         {
-            if(this.id != object.instances[i].id)
+            for(var i = 0; i < object.instances.length; i += 1)
             {
-                if(this.checkCollision(object.instances[i]))
+                if(this != object.instances[i])
                 {
-                    return(object.instances[i]);
+                    if(checkCollision(object.instances[i], this))
+                    {
+                        //alert('this = ' + this.id + ', other = ' + object.instances[i].id);
+                        return(object.instances[i]);
+                    }
                 }
             }
         }
         return(noone);
     }
 
-    // Check collision with a certain object, and return the other object collided with
-    this.checkCollision = function(object)
+    // Get the nearest instance of an object to a point
+    this.instance_nearest = function(x, y, object)
     {
-        var ob = object;
+        var nearest = noone;
+        var dist = 9999999;
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            if(object.instances[i] != this)
+            {
+                var dist2 = point_distance(x, y, object.instances[i].x, object.instances[i].y);
+                if(dist2 < dist)
+                {
+                    dist = dist2;
+                    nearest = object.instances[i];
+                }
+            }
+        }
+
+        return(nearest);
+    }
+}
+
+function checkCollision(object1, object2)
+    {
+        var ob = object1;
+        var ob2 = object2;
+
         var obleft = ob.x;
         var obtop = ob.y;
         var obright = ob.x + ob.width;
         var obbottom = ob.y + ob.height;
 
-        var left = this.x;
-        var top = this.y;
-        var right = this.x + this.width;
-        var bottom = this.y + this.height;
+        var left = ob2.x;
+        var top = ob2.y;
+        var right = ob2.x + ob2.width;
+        var bottom = ob2.y + ob2.height;
 
-        if(obleft > right || obright < left || obtop > bottom || obbottom < top)
+        if(object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
+		object1.y < object2.y + object2.height && object1.y + object1.height > object2.y)
           {
-            return(true);
+              return(true);
           }
           else
           {
               return(false);
           }
     }
-}
 
 // A sprite object
 function sprite(im)
@@ -673,7 +703,7 @@ function updateGameArea()
     // FPS CALCULATION
     var delta = (new Date().getTime() - lastTick) / 1000;
     lastTick = new Date().getTime();
-    fps = 1 / delta;
+    fps = ceil(1 / delta);
 
     var oldViewAngle = view_angle; // Store the view angle
     var oldViewW = view_wview;
@@ -840,18 +870,6 @@ function draw_line(x1, y1, x2, y2)
     context.moveTo(x1 - view_xview, y1 - view_yview);
     context.lineTo(x2 - view_xview, y2 - view_yview);
     context.stroke();
-    context.closePath();
-}
-
-// Draw a line from one point to another
-function draw_line_width(x1, y1, x2, y2, width)
-{
-    context.beginPath();
-    context.lineWidth(width);
-    context.moveTo(x1 - view_xview, y1 - view_yview);
-    context.lineTo(x2 - view_xview, y2 - view_yview);
-    context.stroke();
-    context.lineWidth(1);
     context.closePath();
 }
 
@@ -1079,3 +1097,30 @@ function screen_get_height()
 {
     return (screen.height);
 }
+
+/*
+    To set up an enum:
+    var EnumColors={}; // Initialize the enum
+    EnumColors.Enum('RED','BLUE','GREEN','YELLOW'); // Set up the enum with the values
+    // Call the enum values
+    EnumColors.RED;    // == 0
+    EnumColors.BLUE;   // == 1
+    EnumColors.GREEN;  // == 2
+    EnumColors.YELLOW; // == 3
+*/
+Object.defineProperty(Object.prototype,'Enum', {
+    value: function() {
+        for(i in arguments) {
+            Object.defineProperty(this,arguments[i], {
+                value:parseInt(i),
+                writable:false,
+                enumerable:true,
+                configurable:true
+            });
+        }
+        return this;
+    },
+    writable:false,
+    enumerable:false,
+    configurable:false
+}); 

@@ -95,7 +95,7 @@
     <!-- onLoad="function name that is in the script to start the game" -->
     <!-- Create the canvas element the game draws to -->
     <div id='editordiv' class='split left'>
-        <textarea rows='10' id='tbcode'></textarea>
+        <textarea rows='10' id='tbcode' onkeyup='gameRestartEval()'></textarea>
     </div>
     <div id='canvasdiv' class='split right'>
         <canvas id='canvas'></canvas>

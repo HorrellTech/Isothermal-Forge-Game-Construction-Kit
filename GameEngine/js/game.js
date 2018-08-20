@@ -63,6 +63,7 @@ health = 100;
 lives = 3;
 instance_count = 0;
 object_count = 0;
+delta_time = 0;
 
 // Input events
 document.body.addEventListener('keydown', function(e) 
@@ -81,6 +82,18 @@ document.body.addEventListener('mousemove', function(e)
     mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
     my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
 });
+
+function gameRestart()
+{
+	gameStart();
+}
+
+function gameRestartEval()
+{
+	var c = document.getElementById('tbcode').value;
+	gameStart();
+	execute_string(c);
+}
 
 // Scale the canvas relative to it's current size (1 = normal)
 function scaleCanvas(xscale, yscale)
@@ -112,6 +125,7 @@ resm = new resourceManager();
 function gameStart()
 {
     cancelAnimationFrame(animationFrame);
+	gameObjects = [];
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
 
@@ -123,7 +137,7 @@ function gameStart()
 
     // Game logic here
     var object0 = object_add();
-    var object1 = object_add();
+    //var object1 = object_add();
 
     object0.awake = function()
     {
@@ -147,7 +161,7 @@ function gameStart()
         this.depth = -9999;
     }
 
-    object1.awake = function()
+    /*object1.awake = function()
     {
         var col = irandom_range(0, 255);
         //this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
@@ -236,7 +250,8 @@ function gameStart()
     for(var i = 0; i < 500; i += 1)
     {
         instance_create(random(room_width), random(room_height), object1);
-    }
+    }*/
+    instance_create(32, 32, object0);
 }
 
 function skinColor()
@@ -797,6 +812,8 @@ function updateGameArea()
         view_angle % 360;*/
 
         animationFrame = requestAnimationFrame(updateGameArea);
+		
+		delta_time += 1 % 2;
 }
 
 // Gets the number of instances of the given object
@@ -928,23 +945,26 @@ function draw_text_outline(x, y, text)
 // Draw a circle
 function draw_circle(x, y, r, outline)
 {
-    if(outline)
-    {
-        context.beginPath();
-        context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
-        context.closePath();
-        context.stroke();
-    }
-    else
-    {
-        var oldLineWidth = context.lineWidth;
-        context.lineWidth = 0;
-        context.beginPath();
-        context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
-        context.closePath();
-        context.fill();
-        context.lineWidth = oldLineWidth;
-    }
+	if(r > 0)
+	{
+		if(outline)
+		{
+			context.beginPath();
+			context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+			context.closePath();
+			context.stroke();
+		}
+		else
+		{
+			var oldLineWidth = context.lineWidth;
+			context.lineWidth = 0;
+			context.beginPath();
+			context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+			context.closePath();
+			context.fill();
+			context.lineWidth = oldLineWidth;
+		}
+	}
 }
 
 // MATH STUFF
@@ -1102,6 +1122,15 @@ function string(val)
 function real(val)
 {
     return (parseInt(val));
+}
+
+// Returns a value pulsing at the rate of delay to a maximum number
+/*
+	var red = pulse(10, 255);
+*/
+function pulse(delay, max)
+{
+	return (sin(delta_time / delay) * max);
 }
 
 // Execute javascript code from a string

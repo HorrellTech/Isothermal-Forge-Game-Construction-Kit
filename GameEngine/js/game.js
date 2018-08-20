@@ -150,7 +150,8 @@ function gameStart()
     object1.awake = function()
     {
         var col = irandom_range(0, 255);
-        this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
+        //this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
+        this.color = skinColor();
         this.depth = 1;
         this.width = 16;
         this.height = 16;
@@ -236,6 +237,29 @@ function gameStart()
     {
         instance_create(random(room_width), random(room_height), object1);
     }
+}
+
+function skinColor()
+{
+    var col = '#FFFFFF';
+    switch (irandom(3))
+    {
+        case 0:
+            col = ('#FFE0BD');
+        break;
+        case 1:
+            col = ('#FFCD94');
+        break;
+        case 2:
+            col = ('#FFE39F');
+        break;
+
+        case 3:
+            col = ('#633C1D');
+        break;
+    }
+
+    return(col);
 }
 
 // The main game area where the canvas will be held

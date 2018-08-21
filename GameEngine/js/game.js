@@ -1133,6 +1133,14 @@ function pulse(delay, max)
 	return (sin(delta_time / delay) * max);
 }
 
+// Returns a value pulsing at the rate of delay to a maximum number
+/*
+*/
+function pulse_ext(delay, variation, max)
+{
+	return ((max / 2) + (sin(delta_time / delay) * (max - variation)));
+}
+
 // Execute javascript code from a string
 function execute_string(string)
 {

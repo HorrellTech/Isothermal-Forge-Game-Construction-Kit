@@ -308,7 +308,7 @@ function gameObject(x, y, width, height)
         this.xprevious = this.x;
         this.yprevious = this.y;
 
-        this.image_index += 1 % this.image_number;
+        //this.image_index += 1 % this.image_number;
 
         this.loop_begin();
         this.loop();
@@ -427,6 +427,9 @@ function gameObject(x, y, width, height)
         temp.hasWoken = false;
         temp.awake = this.awake;
         temp.update = this.update;
+        temp.loop = this.loop;
+        temp.loop_begin = this.loop_begin;
+        temp.loop_end = this.loop_end;
         temp.draw = this.draw;
         temp.object_id = this;
         temp.id = this.id;
@@ -518,8 +521,6 @@ function gameObject(x, y, width, height)
         }
     };
 
-    // DRAWING
-
     // Check if the object is within the view bounds
     this.within_view = function()
     {
@@ -544,7 +545,7 @@ function gameObject(x, y, width, height)
         {
             for(var i = 0; i < object.instances.length; i += 1)
             {
-                if(this != object.instances[i])
+                if(this != object.instances[i] && object.instances[i].active)
                 {
                     if(checkCollision(object.instances[i], this))
                     {
@@ -564,7 +565,7 @@ function gameObject(x, y, width, height)
         var dist = 9999999;
         for(var i = 0; i < object.instances.length; i += 1)
         {
-            if(object.instances[i] != this)
+            if(object.instances[i] != this && object.instances[i].active)
             {
                 var dist2 = point_distance(x, y, object.instances[i].x, object.instances[i].y);
                 if(dist2 < dist)
@@ -581,19 +582,6 @@ function gameObject(x, y, width, height)
 
 function checkCollision(object1, object2)
     {
-        var ob = object1;
-        var ob2 = object2;
-
-        var obleft = ob.x;
-        var obtop = ob.y;
-        var obright = ob.x + ob.width;
-        var obbottom = ob.y + ob.height;
-
-        var left = ob2.x;
-        var top = ob2.y;
-        var right = ob2.x + ob2.width;
-        var bottom = ob2.y + ob2.height;
-
         if(object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
 		object1.y < object2.y + object2.height && object1.y + object1.height > object2.y)
           {
@@ -830,6 +818,32 @@ function draw_line(x1, y1, x2, y2)
     context.closePath();
 }
 
+// Start drawing a primivite shape, from the x and y position
+function primitive_start()
+{
+    context.beginPath();
+}
+
+// Point to draw to next
+function primitive_draw(x, y)
+{
+    context.lineTo(x - view_xview, y - view_yview);
+}
+
+// End the primitive and set if it is filled or not
+function primitive_end(fill)
+{
+    context.closePath();
+    if(fill)
+    {
+        context.fill();
+    }
+    else
+    {
+        context.stroke();
+    }
+}
+
 // Set the text font, '30' 'Arial' for example
 function draw_set_font(size, name)
 {
@@ -1046,15 +1060,31 @@ function real(val)
 */
 function pulse(delay, max)
 {
-	return (sin(delta_time / delay) * max);
+    var val = sin(delta_time / delay) * max;
+	return (val);
 }
 
-// Returns a value pulsing at the rate of delay to a maximum number
-/*
-*/
-function pulse_ext(delay, variation, max)
+// Returns a value pulsing at the rate of delay from 0 to a maximum number
+function pulse_positive(delay, max)
 {
-	return ((max / 2) + (sin(delta_time / delay) * (max - variation)));
+	var val = sin(delta_time / delay) * max;
+	return (keep_positive(val));
+}
+
+// Returns a value pulsing at the rate of delay from 0 to a maximum number
+function pulse_negative(delay, max)
+{
+	var val = sin(delta_time / delay) * max;
+	return (keep_negative(val));
+}
+
+// Clamp a value to a max and min value
+function clamp(value, min, max)
+{
+    if(value > max) { value = max; }
+    if(value < min) { value = min; }
+
+    return (value);
 }
 
 // Execute javascript code from a string
@@ -1073,6 +1103,28 @@ function screen_get_width()
 function screen_get_height()
 {
     return (screen.height);
+}
+
+// Return a number that is always positive
+function keep_positive(x)
+{
+    if(x < 0)
+    {
+        x *= -1;
+    }
+
+    return(x);
+}
+
+// Return a number that is always negative
+function keep_negative(x)
+{
+    if(x > 0)
+    {
+        x *= -1;
+    }
+
+    return(x);
 }
 
 /**
@@ -1219,20 +1271,29 @@ function f3d_draw_line(x1, y1, z1, x2, y2, z2)
     );
 }
 
-// Draw a flat rectangle at a z position
-function f3d_draw_rectangle(x1, y1, x2, y2, z, outline)
+// Draw a circle in fake 3d
+function f3d_draw_circle(x, y, z, r, outline)
 {
-    var scale, hor, ver, tempZ, scale;
-    tempZ = f3d_calculate_z(z);
-    scale = (tempZ / 500);
-    hor = f3d_get_hor(x1);
-    ver = f3d_get_ver(y1);
+    var tempZ = f3d_calculate_z(z);
+    var hor = f3d_get_hor(x);
+    var ver = f3d_get_ver(y);
 
-    draw_rectangle(
-        x1 - ((x2 - x1) / 2) * scale - (tempZ * hor),
-        y1 - ((y2 - y1) / 2) * scale - (tempZ * ver),
-        x2 - ((x2 - x1) / 2) * scale - (tempZ * hor),
-        y2 - ((y2 - y1) / 2) * scale - (tempZ * ver),
-        outline
-    );
+    draw_circle(x - (tempZ * hor), y - (tempZ * ver), r, outline);
+}
+
+function f3d_draw_wall(x1, y1, z1, h1, x2, y2, z2, h2, outline)
+{
+    var zz1 = f3d_calculate_z(z1);
+    var zz2 = f3d_calculate_z(z2);
+    var hor1 = f3d_get_hor(x1);
+    var ver1 = f3d_get_ver(y1);
+    var hor2 = f3d_get_hor(x2);
+    var ver2 = f3d_get_ver(y2);
+
+    primitive_start();
+        primitive_draw(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
+        primitive_draw(x1 - ((zz1 + h1) * hor1), y1 - ((zz1 + h1) * ver1));
+        primitive_draw(x2 - ((zz2 + h2) * hor1), y2 - ((zz2 + h2) * ver2));
+        primitive_draw(x2 - ((zz2) * hor2), y2 - ((zz2) * ver2));
+    primitive_end(!outline);
 }

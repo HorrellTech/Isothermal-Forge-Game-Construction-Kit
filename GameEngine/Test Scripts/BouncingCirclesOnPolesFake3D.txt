@@ -1,0 +1,32 @@
+background_color = c_green;
+
+var o = object_add();
+
+o.draw = function() 
+{
+    var p = pulse_positive(100, 200);
+
+    depth = f3d_depth(this.x, this.y, 128);
+
+    draw_set_color(c_dkgray);
+    f3d_draw_line(this.x, this.y, 0, this.x + lengthdir_x(32, -45), this.y + lengthdir_y(32, -45), 0);
+    draw_set_color(c_red);
+    f3d_draw_line(this.x, this.y, 0, this.x, this.y, p); 
+
+    f3d_draw_circle(this.x, this.y, p, 16, true);
+
+    if(this.x + 32 < view_xview)
+    {
+        this.x = (view_xview + view_wview) + irandom(view_wview / 4);
+        this.y = irandom(view_hview);
+    }
+
+    view_xview += 0.01;
+
+    this.move_snap(32, 32); // Snap to a grid to prevent bunching up
+}
+
+for(var i = 0; i < 50; i += 1)
+{
+    instance_create(irandom(room_width), irandom(room_height), o);
+}

@@ -1241,3 +1241,21 @@ function f3d_draw_line(x1, y1, z1, x2, y2, z2)
         y2-(z22 * f3d_get_ver(y2))
     );
 }
+
+// Draw a flat rectangle at a z position
+function f3d_draw_rectangle(x1, y1, x2, y2, z, outline)
+{
+    var scale, hor, ver, tempZ, scale;
+    tempZ = f3d_calculate_z(z);
+    scale = (tempZ / 500);
+    hor = f3d_get_hor(x1);
+    ver = f3d_get_ver(y1);
+
+    draw_rectangle(
+        x1 - ((x2 - x1) / 2) * scale - (tempZ * hor),
+        y1 - ((y2 - y1) / 2) * scale - (tempZ * ver),
+        x2 - ((x2 - x1) / 2) * scale - (tempZ * hor),
+        y2 - ((y2 - y1) / 2) * scale - (tempZ * ver),
+        outline
+    );
+}

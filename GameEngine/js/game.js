@@ -1285,6 +1285,14 @@ function f3d_draw_circle(x, y, z, r, outline)
     draw_circle(x - (tempZ * hor), y - (tempZ * ver), r, outline);
 }
 
+function f3d_draw_vertex(x, y, z)
+{
+    var zz = f3d_calculate_z(z);
+
+    draw_vertex(x - (z * f3d_get_hor(x)), y - (z * f3d_get_ver(y)));
+}
+
+// Draw a floor or 3d rectangle
 function f3d_draw_floor(x1, y1, z1, x2, y2, z2, outline)
 {
     var zz1 = f3d_calculate_z(z1);
@@ -1315,13 +1323,10 @@ function f3d_draw_wall(x1, y1, z1, h1, x2, y2, z2, h2, outline)
     var scale = 1 + zz1 / 500;
 
     draw_primitive_begin();
-        /*draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
+        draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
         draw_vertex(x1 - (((zz1 + h1) * hor1)), y1 - (((zz1 + h1) * ver1)));
         draw_vertex(x2 - (((zz2 + h2) * hor2)), y2 - (((zz2 + h2) * ver2)));
-        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));*/
-        draw_vertex(x1 - (zz1 * hor1), y1 - (zz2 * ver1));
-        draw_vertex(x1 - (zz1 * hor1), y2 - (zz1 * ver2));
-        draw_vertex(x1 - ((zz1 + h1) * hor1), y2 - ((zz2 + h1) * ver2));
+        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));
     draw_primitive_end(!outline);
 }
 

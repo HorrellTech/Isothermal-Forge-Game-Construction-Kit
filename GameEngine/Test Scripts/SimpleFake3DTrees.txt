@@ -1,0 +1,18 @@
+var o = object_add();
+
+o.draw = function()
+{
+    var l, d;
+    l = point_distance(room_width / 2, room_height / 2, this.x, this.y) / 5;
+    d = point_direction(room_width / 2, room_height / 2, this.x, this.y);
+    draw_set_color(c_red);
+    draw_line(this.x, this.y, this.x + lengthdir_x(l, d), this.y + lengthdir_y(l, d));
+    draw_set_color(c_green);
+    draw_circle(this.x + lengthdir_x(l, d), this.y + lengthdir_y(l, d), 8, false);
+    this.depth = l;
+}
+
+for(var i = 0; i < 500; i += 1)
+{
+    instance_create(random(room_width), random(room_height), o);
+} 

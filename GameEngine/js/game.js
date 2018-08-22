@@ -52,6 +52,7 @@ global = noone; // The global instance
 room_speed = 30;
 room_width = 640;
 room_height = 480;
+background_color = c_ltgray;
 fps = 0;
 view_xview = 0;
 view_yview = 0;
@@ -159,96 +160,6 @@ function gameStart()
         }
     }
 
-    /*object1.awake = function()
-    {
-        var col = irandom_range(0, 255);
-        //this.color = rgb(irandom_range(0, 255), irandom_range(0, 255), irandom_range(0, 255));
-        this.color = skinColor();
-        this.depth = 1;
-        this.width = 16;
-        this.height = 16;
-        this.direction = irandom(360);
-    }
-
-    object1.draw = function()
-    {
-        var len = 8;
-        //if(this.within_view())
-        {
-            draw_set_color(this.color);
-            draw_circle(this.x, this.y, len, false);
-            //draw_rectangle(this.x, this.y, this.x + this.width, this.y + this.height, false);
-            draw_set_color(c_white);
-            draw_line(this.x, this.y, this.x + lengthdir_x(len, this.direction), this.y + lengthdir_y(len, this.direction));
-            draw_set_color(c_white);
-        }
-
-        if(this.mouse_over())
-        {
-            this.color = c_black;
-        }
-
-        this.motion_set(this.direction + random_range(-10, 10), random_range(0, 5));
-    
-        if(this.x > room_width)
-        {
-            this.x = 0;
-            //this.move_bounce(true, false, true);
-        }
-        if(this.y > room_height)
-        {
-            this.y = 0;
-            //this.move_bounce(false, true, true);
-        }
-        if(this.x < 0)
-        {
-            this.x = room_width;
-            //this.move_bounce(true, false, true);
-        }
-        if(this.y < 0)
-        {
-            this.y = room_height;
-            //this.move_bounce(false, true, true);
-        }
-
-        var dist = point_distance(this.x, this.y, mouse_x, mouse_y);
-        var dir = point_direction(this.x, this.y, mouse_x, mouse_y);
-        if(dist < 48)
-        {
-            this.motion_set(-dir, 3);
-        }
-
-        //draw_text(this.x, this.y, string(this.id));
-
-        var col = this.collision_with(object1);
-        if(col != noone)
-        {
-            //this.instance_destroy();
-            if(col.id > this.id)
-            {
-                this.color = col.color;
-            }
-            //draw_text(this.x, this.y - 32, "colliding with: " + string(col.id));
-        }
-
-        var near = this.instance_nearest(this.x, this.y, object1);
-        if(near != noone)
-        {
-            draw_set_color(this.color);
-            //draw_line(this.x, this.y, near.x, near.y);
-            draw_set_color(c_white);
-        }
-        //draw_text(this.x, this.y - 64, "nearest: " + string(near.id));
-
-        this.depth = -this.y;
-    };
-
-    instance_create(32, 32, object0);
-
-    for(var i = 0; i < 500; i += 1)
-    {
-        instance_create(random(room_width), random(room_height), object1);
-    }*/
     global = instance_create(0, 0, globalObj);
 }
 
@@ -293,7 +204,9 @@ var game =
     clear : function() {
         if(this.cont == '2d')
         {
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            draw_set_color(background_color);
+            draw_rectangle(view_xview, view_yview, view_xview + view_wview, view_yview + view_hview);
+            draw_set_color(c_white);
         } 
         else if(this.cont == 'webgl')
         {

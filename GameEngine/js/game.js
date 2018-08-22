@@ -127,7 +127,9 @@ resm = new resourceManager();
 function gameStart()
 {
     cancelAnimationFrame(animationFrame);
-	gameObjects = [];
+    gameObjects = [];
+    view_xview = 0;
+    view_yview = 0;
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
 
@@ -1186,3 +1188,56 @@ Object.defineProperty(Object.prototype,'Enum', {
     enumerable:false,
     configurable:false
 }); 
+
+// F3D FUNCTIONS FOR FAKE 3D (Based off w3d by TheSnidr on Game Maker Forums)
+
+// Calculate the natural depth of the instance
+// depth = f3d_depth(x, y, 0);
+function f3d_depth(x, y, aditional_depth)
+{
+    return (point_distance(view_xview + view_wview / 2,view_yview + view_hview / 2, x, y) / 10) + aditional_depth
+}
+
+// To make a better feel of 3d, this function should be used
+function f3d_calculate_z(z)
+{
+    if(z <= 0)
+    {
+        return ((-10 * z) / (0.02 * z - 10));
+    }
+    return (Math.pow(0.8 * z, (0.0008 * z + 1)));
+}
+
+function f3d_get_hor(x)
+{
+    return ((view_xview + view_wview / 2 - x) / 500);
+}
+
+function f3d_get_ver(y)
+{
+    return ((view_yview + view_hview / 2 - y) / 500);
+}
+
+function f3d_get_x(x, z)
+{
+    return (x - f3d_calculate_z(z) * f3d_get_hor(x));
+}
+
+function f3d_get_y(y, z)
+{
+    return (y - f3d_calculate_z(z) * f3d_get_ver(y));
+}
+
+// Draw a fake 3d line
+function f3d_draw_line(x1, y1, z1, x2, y2, z2)
+{
+    var z11,z22;
+    z11=f3d_calculate_z(z1)
+    z22=f3d_calculate_z(z2)
+    draw_line(
+        x1-(z11 * f3d_get_hor(x1)), 
+        y1-(z11 * f3d_get_ver(y1)), 
+        x2-(z22 * f3d_get_hor(x2)), 
+        y2-(z22 * f3d_get_ver(y2))
+    );
+}

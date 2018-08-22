@@ -45,8 +45,10 @@ my = 0; // Base mouse y
 lastTick = 0; // Last time the frame ticked
 font_size = 12;
 font_style = "Arial";
+globalObj = noone;
 
 // GLOBAL VARIABLES
+global = noone; // The global instance
 room_speed = 30;
 room_width = 640;
 room_height = 480;
@@ -136,29 +138,23 @@ function gameStart()
     draw_set_color(c_white);
 
     // Game logic here
-    var object0 = object_add();
-    //var object1 = object_add();
+    globalObj = object_add();
 
-    object0.awake = function()
+    globalObj.awake = function()
     {
-        this.orbDir = 0;
+        this.debug_mode = false;
+        this.text_color = c_red;
+        this.depth = -9999999;
     }
 
-    object0.draw = function()
+    globalObj.draw = function()
     {
-        this.orbDir += 10;
-        draw_set_color(c_red);
-        draw_text(view_xview, view_yview, "Instance Count: " + instance_count + "; FPS: " + string(fps));
-        draw_set_color(c_black);
-        //draw_text_outline(view_xview, view_yview, "Instance Count: " + instance_count);
-        draw_set_color(c_white);
-
-        //view_xview += 1;
-        //view_yview += 1;
-
-        // Draw things around the cursor
-        draw_circle(mouse_x + lengthdir_x(64, this.orbDir), mouse_y + lengthdir_y(64, this.orbDir), 8, false);
-        this.depth = -9999;
+        if(this.debug_mode)
+        {
+            draw_set_color(this.text_color);
+            draw_text(view_xview, view_yview, "Instance Count: " + instance_count + "; FPS: " + string(fps));
+            draw_set_color(c_white);
+        }
     }
 
     /*object1.awake = function()
@@ -251,7 +247,7 @@ function gameStart()
     {
         instance_create(random(room_width), random(room_height), object1);
     }*/
-    instance_create(32, 32, object0);
+    global = instance_create(0, 0, globalObj);
 }
 
 function skinColor()
@@ -357,6 +353,9 @@ function gameObject(x, y, width, height)
     this.gravity = 0;
     this.gravity_direction = 270;
 
+    this.image_index = 0;
+    this.image_number = 1;
+
     this.hasWoken = false;
 
     // When the object is first created
@@ -393,6 +392,8 @@ function gameObject(x, y, width, height)
 
         this.xprevious = this.x;
         this.yprevious = this.y;
+
+        this.image_index += 1 % this.image_number;
 
         this.loop_begin();
         this.loop();

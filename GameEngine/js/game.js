@@ -223,6 +223,7 @@ var game =
 function instance_create(x, y, object)
 {
     var temp = object.instantiate(x, y);
+    temp.isParent = false;
 
     return(temp);
 }
@@ -296,97 +297,100 @@ function gameObject(x, y, width, height)
     // The update called in the game update method (DO NOT OVER WRITE)
     this.update = function()
     {
-        if(!this.hasWoken)
+        //if(!isParent)
         {
-            this.awake();
-            this.hasWoken = true;
-            this.xstart = this.x;
-            this.ystart = this.y;
-        }
-        var oldDepth = this.depth;
-
-        this.xprevious = this.x;
-        this.yprevious = this.y;
-
-        //this.image_index += 1 % this.image_number;
-
-        this.loop_begin();
-        this.loop();
-
-        // The speed functionality
-        if(this.speed != 0)
-        {
-            this.hspeed = lengthdir_x(this.speed, this.direction);
-            this.vspeed = lengthdir_y(this.speed, this.direction);
-        }
-
-        // Horizontal speed and vertical speed functionality
-        if(this.hspeed != 0)
-        {
-            this.x += this.hspeed;
-        }
-        if(this.vspeed != 0)
-        {
-            this.y += this.vspeed;
-        }
-
-        // Gravity functionality
-        if(this.gravity != 0)
-        {
-            this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
-            this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
-        }
-
-        this.loop_end();
-
-        // Stop direction from exceeding 360 degrees
-        this.direction = (this.direction % 360.0);
-
-        // Friction
-        if (this.hspeed > 0)
-        {
-            this.hspeed -= this.friction;
-            if(this.hspeed < 0)
+            if(!this.hasWoken)
             {
-                this.hspeed = 0;
+                this.awake();
+                this.hasWoken = true;
+                this.xstart = this.x;
+                this.ystart = this.y;
             }
-        }
-        if (this.hspeed < 0)
-        {
-            this.hspeed += this.friction;
+            var oldDepth = this.depth;
+
+            this.xprevious = this.x;
+            this.yprevious = this.y;
+
+            //this.image_index += 1 % this.image_number;
+
+            this.loop_begin();
+            this.loop();
+
+            // The speed functionality
+            if(this.speed != 0)
+            {
+                this.hspeed = lengthdir_x(this.speed, this.direction);
+                this.vspeed = lengthdir_y(this.speed, this.direction);
+            }
+
+            // Horizontal speed and vertical speed functionality
+            if(this.hspeed != 0)
+            {
+                this.x += this.hspeed;
+            }
+            if(this.vspeed != 0)
+            {
+                this.y += this.vspeed;
+            }
+
+            // Gravity functionality
+            if(this.gravity != 0)
+            {
+                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
+                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
+            }
+
+            this.loop_end();
+
+            // Stop direction from exceeding 360 degrees
+            this.direction = (this.direction % 360.0);
+
+            // Friction
             if (this.hspeed > 0)
             {
-                this.hspeed = 0;
+                this.hspeed -= this.friction;
+                if(this.hspeed < 0)
+                {
+                    this.hspeed = 0;
+                }
             }
-        }
-        if (this.vspeed > 0)
-        {
-            this.vspeed -= this.friction;
-            if (this.vspeed < 0)
+            if (this.hspeed < 0)
             {
-                this.vspeed = 0;
+                this.hspeed += this.friction;
+                if (this.hspeed > 0)
+                {
+                    this.hspeed = 0;
+                }
             }
-        }
-        if (this.vspeed < 0)
-        {
-            this.vspeed += this.friction;
             if (this.vspeed > 0)
             {
-                this.vspeed = 0;
+                this.vspeed -= this.friction;
+                if (this.vspeed < 0)
+                {
+                    this.vspeed = 0;
+                }
             }
-        }
+            if (this.vspeed < 0)
+            {
+                this.vspeed += this.friction;
+                if (this.vspeed > 0)
+                {
+                    this.vspeed = 0;
+                }
+            }
 
-        // Rearrange based on new depth
-        if(this.depth != oldDepth)
-        {
-            //object_id.has_sorted_depth = false;
-            object_id.need_sorted = true;
-        }
+            // Rearrange based on new depth
+            if(this.depth != oldDepth)
+            {
+                //object_id.has_sorted_depth = false;
+                object_id.need_sorted = true;
+            }
 
-        // If the object hasn't sorted by depth
-        if(this.need_sorted)
-        {
-            this.sort_by_depth();
+            // If the object hasn't sorted by depth
+            if(this.need_sorted)
+            {
+                this.sort_by_depth();
+            }
         }
     };
 
@@ -819,19 +823,19 @@ function draw_line(x1, y1, x2, y2)
 }
 
 // Start drawing a primivite shape, from the x and y position
-function primitive_start()
+function draw_primitive_begin()
 {
     context.beginPath();
 }
 
 // Point to draw to next
-function primitive_draw(x, y)
+function draw_vertex(x, y)
 {
     context.lineTo(x - view_xview, y - view_yview);
 }
 
 // End the primitive and set if it is filled or not
-function primitive_end(fill)
+function draw_primitive_end(fill)
 {
     context.closePath();
     if(fill)
@@ -1224,7 +1228,7 @@ Object.defineProperty(Object.prototype,'Enum', {
 // depth = f3d_depth(x, y, 0);
 function f3d_depth(x, y, aditional_depth)
 {
-    return (point_distance(view_xview + view_wview / 2,view_yview + view_hview / 2, x, y) / 10) + aditional_depth
+    return (point_distance(view_xview + view_wview / 2, view_yview + view_hview / 2, x, y) / 10) + aditional_depth
 }
 
 // To make a better feel of 3d, this function should be used
@@ -1281,6 +1285,24 @@ function f3d_draw_circle(x, y, z, r, outline)
     draw_circle(x - (tempZ * hor), y - (tempZ * ver), r, outline);
 }
 
+function f3d_draw_floor(x1, y1, z1, x2, y2, z2, outline)
+{
+    var zz1 = f3d_calculate_z(z1);
+    var zz2 = f3d_calculate_z(z2);
+    var hor1 = f3d_get_hor(x1);
+    var ver1 = f3d_get_ver(y1);
+    var hor2 = f3d_get_hor(x2);
+    var ver2 = f3d_get_ver(y2);
+
+    draw_primitive_begin();
+        draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
+        draw_vertex(x2 - (zz2 * hor2), y1 - (zz1 * ver1));
+        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));
+        draw_vertex(x1 - (zz1 * hor1), y2 - (zz2 * ver2));
+    draw_primitive_end(!outline);
+}
+
+// Draw a fake 3d wall
 function f3d_draw_wall(x1, y1, z1, h1, x2, y2, z2, h2, outline)
 {
     var zz1 = f3d_calculate_z(z1);
@@ -1290,10 +1312,41 @@ function f3d_draw_wall(x1, y1, z1, h1, x2, y2, z2, h2, outline)
     var hor2 = f3d_get_hor(x2);
     var ver2 = f3d_get_ver(y2);
 
-    primitive_start();
-        primitive_draw(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
-        primitive_draw(x1 - ((zz1 + h1) * hor1), y1 - ((zz1 + h1) * ver1));
-        primitive_draw(x2 - ((zz2 + h2) * hor1), y2 - ((zz2 + h2) * ver2));
-        primitive_draw(x2 - ((zz2) * hor2), y2 - ((zz2) * ver2));
-    primitive_end(!outline);
+    var scale = 1 + zz1 / 500;
+
+    draw_primitive_begin();
+        /*draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
+        draw_vertex(x1 - (((zz1 + h1) * hor1)), y1 - (((zz1 + h1) * ver1)));
+        draw_vertex(x2 - (((zz2 + h2) * hor2)), y2 - (((zz2 + h2) * ver2)));
+        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));*/
+        draw_vertex(x1 - (zz1 * hor1), y1 - (zz2 * ver1));
+        draw_vertex(x1 - (zz1 * hor1), y2 - (zz1 * ver2));
+        draw_vertex(x1 - ((zz1 + h1) * hor1), y2 - ((zz2 + h1) * ver2));
+    draw_primitive_end(!outline);
+}
+
+// Draw a fake 3d cube
+function f3d_draw_cube(x1, y1, x2, y2, z, height, outline)
+{
+    f3d_draw_wall(x1, y1, z, z + height, x2, y1, z, z + height, outline);
+    f3d_draw_wall(x2, y1, z, z + height, x2, y2, z, z + height, outline);
+    f3d_draw_wall(x1, y2, z, z + height, x2, y2, z, z + height, outline);
+    f3d_draw_wall(x1, y1, z, z + height, x1, y2, z, z + height, outline);
+    f3d_draw_floor(x1, y1, z + height, x2, y2, z + height, outline);
+}
+
+// Draw a fake 3d cube with basic looking lighting
+function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
+{
+    draw_set_color(c_white);
+    f3d_draw_wall(x1, y1, z, height, x2, y1, z, height, outline);
+    draw_set_color(c_ltgray);
+    f3d_draw_wall(x2, y1, z, height, x2, y2, z, height, outline);
+    draw_set_color(c_gray);
+    f3d_draw_wall(x1, y2, z, height, x2, y2, z, height, outline);
+    draw_set_color(c_dkgray);
+    f3d_draw_wall(x1, y1, z, height, x1, y2, z, height, outline);
+    draw_set_color(c_white);
+    f3d_draw_floor(x1, y1, z + height, x2, y2, z + height, outline);
+    draw_set_color(c_white);
 }

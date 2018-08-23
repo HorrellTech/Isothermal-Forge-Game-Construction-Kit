@@ -67,6 +67,7 @@ lastTick = 0; // Last time the frame ticked
 font_size = 12;
 font_style = "Arial";
 globalObj = noone;
+//mouseClick = false;
 
 // GLOBAL VARIABLES
 global = noone; // The global instance
@@ -1367,7 +1368,8 @@ function f3d_draw_floor(x1, y1, x2, y2, z, outline)
 
     if(outline)
     {
-        f3d_draw_line(x1, y2, z, x2, y1, z)
+        //f3d_draw_line(x1, y2, z, x2, y1, z);
+        f3d_draw_line(x1, y1, z, x2, y2, z);
     }
 }
 
@@ -1383,13 +1385,15 @@ function f3d_draw_wall(x1, y1, x2, y2, z, height, outline)
 
     if(outline)
     {
-        f3d_draw_line(x1, y2, z, x2, y1, z + height);
+        //f3d_draw_line(x1, y2, z, x2, y1, z + height);
+        f3d_draw_line(x2, y1, z, x1, y2, z + height);
     }
 }
 
 // Draw a fake 3d cube
 function f3d_draw_cube(x1, y1, x2, y2, z, height, outline)
 {
+    f3d_draw_floor(x1, y1, x2, y2, z, outline);
     f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
     f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
     f3d_draw_wall(x1, y2, x2, y2, z, height, outline);
@@ -1400,7 +1404,8 @@ function f3d_draw_cube(x1, y1, x2, y2, z, height, outline)
 // Draw a fake 3d cube with basic looking lighting
 function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 {
-    draw_set_color(c_white);
+    draw_set_color(c_dkgray);
+    f3d_draw_floor(x1, y1, x2, y2, z, outline);
     f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
     draw_set_color(c_ltgray);
     f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
@@ -1412,3 +1417,31 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
     f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
     draw_set_color(c_white);
 }
+
+// PLAYER INPUT
+function keyboard_check(key)
+{
+    return(keys[key]);
+}
+
+// KEYBOARD KEYS
+var KEY = {
+    BACKSPACE: 8,
+    TAB:       9,
+    RETURN:   13,
+    ESC:      27,
+    SPACE:    32,
+    PAGEUP:   33,
+    PAGEDOWN: 34,
+    END:      35,
+    HOME:     36,
+    LEFT:     37,
+    UP:       38,
+    RIGHT:    39,
+    DOWN:     40,
+    INSERT:   45,
+    DELETE:   46,
+    ZERO:     48, ONE: 49, TWO: 50, THREE: 51, FOUR: 52, FIVE: 53, SIX: 54, SEVEN: 55, EIGHT: 56, NINE: 57,
+    A:        65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71, H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78, O: 79, P: 80, Q: 81, R: 82, S: 83, T: 84, U: 85, V: 86, W: 87, X: 88, Y: 89, Z: 90,
+    TILDA:    192
+  };

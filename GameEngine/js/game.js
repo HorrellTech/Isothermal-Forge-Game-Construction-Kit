@@ -145,7 +145,7 @@ function gameStart()
 
     globalObj.awake = function()
     {
-        this.debug_mode = false;
+        this.debug_mode = true;
         this.text_color = c_red;
         this.depth = -9999999;
     }
@@ -380,14 +380,17 @@ function gameObject(x, y, width, height)
             }
 
             // Rearrange based on new depth
-            if(this.depth != oldDepth)
+            /*if(this.depth != oldDepth)
             {
-                //object_id.has_sorted_depth = false;
-                object_id.need_sorted = true;
-            }
+                var ob = gameObjects.indexOf(this.object_id);
+
+                //gameObjects[ob].has_sorted_depth = false;
+                //gameObjects[ob].need_sorted = true;
+                //alert(ob);
+            }*/
 
             // If the object hasn't sorted by depth
-            if(this.need_sorted)
+           // if(this.need_sorted)
             {
                 this.sort_by_depth();
             }
@@ -397,6 +400,7 @@ function gameObject(x, y, width, height)
     // Sort the instances based on their depth
     this.sort_by_depth = function()
     {
+        //alert("");
         var len = this.instances.length;
 
         for(var i = len - 1; i >= 0; i -= 1) // Loop through instances
@@ -413,6 +417,8 @@ function gameObject(x, y, width, height)
                 }
             }
         }
+
+        //this.instances.sort()
 
         this.has_sorted_depth = true;
         this.need_sorted = false;
@@ -586,15 +592,22 @@ function gameObject(x, y, width, height)
 
 function checkCollision(object1, object2)
     {
-        if(object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
-		object1.y < object2.y + object2.height && object1.y + object1.height > object2.y)
-          {
-              return(true);
-          }
-          else
-          {
-              return(false);
-          }
+        if(object1.active && object2.active)
+        {
+            if(object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
+            object1.y < object2.y + object2.height && object1.y + object1.height > object2.y)
+            {
+                return(true);
+            }
+            else
+            {
+                return(false);
+            }
+        }
+        else
+        {
+            return(false);
+        }
     }
 
 // A sprite object
@@ -606,7 +619,7 @@ function sprite(im)
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()
 {
-    if(objectHasSortedDepth())
+    if(!objectHasSortedDepth())
     {
     var len = this.gameObjects.length;
 
@@ -927,6 +940,12 @@ function round(x)
     return (Math.round(x));
 }
 
+// Returns the value of a base expression taken to a specific power
+function power(x, y)
+{
+    return (Math.pow(x, y));
+}
+
 // Returns the sine of a number
 function sin(x)
 {
@@ -1228,7 +1247,7 @@ Object.defineProperty(Object.prototype,'Enum', {
 // depth = f3d_depth(x, y, 0);
 function f3d_depth(x, y, aditional_depth)
 {
-    return (point_distance(view_xview + view_wview / 2, view_yview + view_hview / 2, x, y) / 10) + aditional_depth
+    return ((point_distance(view_xview + view_wview / 2, view_yview + view_hview / 2, x, y) / 10) + aditional_depth);
 }
 
 // To make a better feel of 3d, this function should be used
@@ -1238,7 +1257,7 @@ function f3d_calculate_z(z)
     {
         return ((-10 * z) / (0.02 * z - 10));
     }
-    return (Math.pow(0.8 * z, (0.0008 * z + 1)));
+    return (power(0.8 * z, (0.0008 * z + 1)));
 }
 
 function f3d_get_hor(x)
@@ -1289,69 +1308,63 @@ function f3d_draw_vertex(x, y, z)
 {
     var zz = f3d_calculate_z(z);
 
-    draw_vertex(x - (z * f3d_get_hor(x)), y - (z * f3d_get_ver(y)));
+    draw_vertex(x - (zz * f3d_get_hor(x)), y - (zz * f3d_get_ver(y)));
 }
 
 // Draw a floor or 3d rectangle
-function f3d_draw_floor(x1, y1, z1, x2, y2, z2, outline)
+function f3d_draw_floor(x1, y1, x2, y2, z, outline)
 {
-    var zz1 = f3d_calculate_z(z1);
-    var zz2 = f3d_calculate_z(z2);
-    var hor1 = f3d_get_hor(x1);
-    var ver1 = f3d_get_ver(y1);
-    var hor2 = f3d_get_hor(x2);
-    var ver2 = f3d_get_ver(y2);
-
     draw_primitive_begin();
-        draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
-        draw_vertex(x2 - (zz2 * hor2), y1 - (zz1 * ver1));
-        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));
-        draw_vertex(x1 - (zz1 * hor1), y2 - (zz2 * ver2));
+        f3d_draw_vertex(x1, y1, z);
+        f3d_draw_vertex(x1, y2, z);
+        f3d_draw_vertex(x2, y2, z);
+        f3d_draw_vertex(x2, y1, z);
     draw_primitive_end(!outline);
+
+    if(outline)
+    {
+        f3d_draw_line(x1, y2, z, x2, y1, z)
+    }
 }
 
 // Draw a fake 3d wall
-function f3d_draw_wall(x1, y1, z1, h1, x2, y2, z2, h2, outline)
+function f3d_draw_wall(x1, y1, x2, y2, z, height, outline)
 {
-    var zz1 = f3d_calculate_z(z1);
-    var zz2 = f3d_calculate_z(z2);
-    var hor1 = f3d_get_hor(x1);
-    var ver1 = f3d_get_ver(y1);
-    var hor2 = f3d_get_hor(x2);
-    var ver2 = f3d_get_ver(y2);
-
-    var scale = 1 + zz1 / 500;
-
     draw_primitive_begin();
-        draw_vertex(x1 - (zz1 * hor1), y1 - (zz1 * ver1));
-        draw_vertex(x1 - (((zz1 + h1) * hor1)), y1 - (((zz1 + h1) * ver1)));
-        draw_vertex(x2 - (((zz2 + h2) * hor2)), y2 - (((zz2 + h2) * ver2)));
-        draw_vertex(x2 - (zz2 * hor2), y2 - (zz2 * ver2));
+        f3d_draw_vertex(x1, y1, z);
+        f3d_draw_vertex(x1, y1, z + height);
+        f3d_draw_vertex(x2, y2, z + height);
+        f3d_draw_vertex(x2, y2, z);
     draw_primitive_end(!outline);
+
+    if(outline)
+    {
+        f3d_draw_line(x1, y2, z, x2, y1, z + height);
+    }
 }
 
 // Draw a fake 3d cube
 function f3d_draw_cube(x1, y1, x2, y2, z, height, outline)
 {
-    f3d_draw_wall(x1, y1, z, z + height, x2, y1, z, z + height, outline);
-    f3d_draw_wall(x2, y1, z, z + height, x2, y2, z, z + height, outline);
-    f3d_draw_wall(x1, y2, z, z + height, x2, y2, z, z + height, outline);
-    f3d_draw_wall(x1, y1, z, z + height, x1, y2, z, z + height, outline);
-    f3d_draw_floor(x1, y1, z + height, x2, y2, z + height, outline);
+    f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
+    f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
+    f3d_draw_wall(x1, y2, x2, y2, z, height, outline);
+    f3d_draw_wall(x1, y1, x1, y2, z, height, outline);
+    f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
 }
 
 // Draw a fake 3d cube with basic looking lighting
 function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 {
     draw_set_color(c_white);
-    f3d_draw_wall(x1, y1, z, height, x2, y1, z, height, outline);
+    f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
     draw_set_color(c_ltgray);
-    f3d_draw_wall(x2, y1, z, height, x2, y2, z, height, outline);
+    f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
     draw_set_color(c_gray);
-    f3d_draw_wall(x1, y2, z, height, x2, y2, z, height, outline);
+    f3d_draw_wall(x1, y2, x2, y2, z, height, outline);
     draw_set_color(c_dkgray);
-    f3d_draw_wall(x1, y1, z, height, x1, y2, z, height, outline);
+    f3d_draw_wall(x1, y1, x1, y2, z, height, outline);
     draw_set_color(c_white);
-    f3d_draw_floor(x1, y1, z + height, x2, y2, z + height, outline);
+    f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
     draw_set_color(c_white);
 }

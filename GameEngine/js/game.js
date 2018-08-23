@@ -116,7 +116,7 @@ function gameRestartEval()
 {
 	var c = document.getElementById('tbcode').value;
 	gameStart();
-	execute_string(c);
+    execute_string(c);
 }
 
 // Scale the canvas relative to it's current size (1 = normal)
@@ -360,6 +360,11 @@ function gameObject(x, y, width, height)
                 this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
                 this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
             }
+            
+            if(this.object_id.instances[0] == this)
+            {
+                this.object_id.sort_by_depth();
+            }
 
             this.loop_end();
 
@@ -399,8 +404,6 @@ function gameObject(x, y, width, height)
                     this.vspeed = 0;
                 }
             }
-
-            this.sort_by_depth();
         }
     };
 
@@ -432,7 +435,8 @@ function gameObject(x, y, width, height)
                 al += this.instances[i].depth + '\n';
             }
 
-            alert(al);
+            //alert(al);
+            //alert(this.instances.length);
         }
     }
 
@@ -631,7 +635,7 @@ function sprite(im)
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()
 {
-    //if(!objectHasSortedDepth())
+    if(gameObjects.length > 0)
     {
     var len = gameObjects.length;
 
@@ -639,9 +643,9 @@ function sortObjectsByDepth()
         {
             for(var j = 1; j <= i; j += 1)
             {
-                //if(gameObjects[j].instances.length > 0)
+                if(gameObjects[j].instances.length > 0)
                 {
-                    gameObjects[j].sort_by_depth();
+                    //gameObjects[j].instances[0].object_id.sort_by_depth();
                     var d1 = gameObjects[j].instances[0].depth;
                     var d2 = gameObjects[j - 1].instances[0].depth;
                     if(d2 < d1)

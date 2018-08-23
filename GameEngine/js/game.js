@@ -171,7 +171,7 @@ function gameStart()
     {
         this.debug_mode = true;
         this.text_color = c_red;
-        this.depth = -9999999;
+        this.depth = -99999999;
     }
 
     globalObj.draw = function()
@@ -1172,7 +1172,7 @@ function keep_positive(x)
         x *= -1;
     }
 
-    return(x);
+    return (x);
 }
 
 // Return a number that is always negative
@@ -1183,7 +1183,20 @@ function keep_negative(x)
         x *= -1;
     }
 
-    return(x);
+    return (x);
+}
+
+// Returns whether or not a rectangle is inside the view bounds
+function within_view(x1, y1, x2, y2)
+{
+    var xx, yy, w, h; // View bounds
+    xx = view_xview;
+    yy = view_yview;
+    w = view_xview + view_wview;
+    h = view_yview + view_hview;
+    return (
+        x1 + (x2) >= xx && y1 + (y2) >= yy && x1 <= w && y1 <= h
+    );
 }
 
 /**
@@ -1249,33 +1262,6 @@ function doPolygonsIntersect (a, b) {
     }
     return true;
 };
-
-/*
-    To set up an enum:
-    var EnumColors={}; // Initialize the enum
-    EnumColors.Enum('RED','BLUE','GREEN','YELLOW'); // Set up the enum with the values
-    // Call the enum values
-    EnumColors.RED;    // == 0
-    EnumColors.BLUE;   // == 1
-    EnumColors.GREEN;  // == 2
-    EnumColors.YELLOW; // == 3
-*/
-Object.defineProperty(Object.prototype,'Enum', {
-    value: function() {
-        for(i in arguments) {
-            Object.defineProperty(this,arguments[i], {
-                value:parseInt(i),
-                writable:false,
-                enumerable:true,
-                configurable:true
-            });
-        }
-        return this;
-    },
-    writable:false,
-    enumerable:false,
-    configurable:false
-}); 
 
 // F3D FUNCTIONS FOR FAKE 3D (Based off w3d by TheSnidr on Game Maker Forums)
 
@@ -1358,7 +1344,24 @@ function f3d_draw_vertex(x, y, z)
     draw_vertex(x - (zz * f3d_get_hor(x)), y - (zz * f3d_get_ver(y)));
 }
 
-// Draw a floor or 3d rectangle
+// Draw a cylinder in fake 3d 
+function f3d_draw_cylinder(x, y, z, r, height, outline)
+{
+    var xx, yy;
+
+    draw_primitive_begin();
+        for(var i = -360 / 10; i < 360; i += 360 / 10)
+        {
+            xx = x + lengthdir_x(r, i);
+            yy = y + lengthdir_y(r, i);
+
+            f3d_draw_vertex(xx, yy, z);
+            f3d_draw_vertex(xx, yy, z + height);
+        }
+    draw_primitive_end(!outline);
+}
+
+// Draw a floor or fake 3d rectangle
 function f3d_draw_floor(x1, y1, x2, y2, z, outline)
 {
     draw_primitive_begin();
@@ -1395,30 +1398,71 @@ function f3d_draw_wall(x1, y1, x2, y2, z, height, outline)
 // Draw a fake 3d cube
 function f3d_draw_cube(x1, y1, x2, y2, z, height, outline)
 {
-    f3d_draw_floor(x1, y1, x2, y2, z, outline);
-    f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
-    f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
-    f3d_draw_wall(x1, y2, x2, y2, z, height, outline);
-    f3d_draw_wall(x1, y1, x1, y2, z, height, outline);
-    f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
+    //f3d_draw_floor(x1, y1, x2, y2, z, outline); // The floor (not needed)
+    var n, e, s, w, vx, vy; // corners
+    n = y1; // up
+    e = x2; // right
+    s = y2; // down
+    w = x1; // left
+
+    vx = view_xview + (view_wview / 2); // Center along the x view
+    vy = view_yview + (view_hview / 2); // Center along the y view
+
+    if(n >= vy)
+    {
+        f3d_draw_wall(x1, y1, x2, y1, z, height, outline); // Top wall
+    }
+    if(e <= vx)
+    {
+        f3d_draw_wall(x2, y1, x2, y2, z, height, outline); // Right wall
+    }
+    if(s <= vy)
+    {
+        f3d_draw_wall(x2, y2, x1, y2, z, height, outline); // Bottom wall
+    }
+    if(w >= vx)
+    {
+        f3d_draw_wall(x1, y2, x1, y1, z, height, outline); // Left wall
+    }
+    f3d_draw_floor(x1, y1, x2, y2, z + height, outline); // The roof
 }
 
 // Draw a fake 3d cube with basic looking lighting
 function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 {
-    draw_set_color(c_dkgray);
-    f3d_draw_floor(x1, y1, x2, y2, z, outline);
-    f3d_draw_wall(x1, y1, x2, y1, z, height, outline);
-    draw_set_color(c_ltgray);
-    f3d_draw_wall(x2, y1, x2, y2, z, height, outline);
-    draw_set_color(c_gray);
-    f3d_draw_wall(x1, y2, x2, y2, z, height, outline);
-    draw_set_color(c_dkgray);
-    f3d_draw_wall(x1, y1, x1, y2, z, height, outline);
+    var n, e, s, w, vx, vy; // corners
+    n = y1; // up
+    e = x2; // right
+    s = y2; // down
+    w = x1; // left
+
+    vx = view_xview + (view_wview / 2); // Center along the x view
+    vy = view_yview + (view_hview / 2); // Center along the y view
+
+    if(n >= vy)
+    {
+        draw_set_color(rgb(128, 128, 128));
+        f3d_draw_wall(x1, y1, x2, y1, z, height, outline); // Top wall
+    }
+    if(e <= vx)
+    {
+        draw_set_color(rgb(64, 64, 64));
+        f3d_draw_wall(x2, y1, x2, y2, z, height, outline); // Right wall
+    }
+    if(s <= vy)
+    {
+        draw_set_color(rgb(156, 156, 156));
+        f3d_draw_wall(x2, y2, x1, y2, z, height, outline); // Bottom wall
+    }
+    if(w >= vx)
+    {
+        draw_set_color(rgb(200, 200, 200));
+        f3d_draw_wall(x1, y2, x1, y1, z, height, outline); // Left wall
+    }
     draw_set_color(c_white);
     f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
-    draw_set_color(c_white);
 }
+
 
 // PLAYER INPUT
 function keyboard_check(key)

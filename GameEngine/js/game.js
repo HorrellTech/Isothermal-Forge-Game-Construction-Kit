@@ -153,6 +153,8 @@ function gameStart()
     gameObjects = [];
     view_xview = 0;
     view_yview = 0;
+    view_wview = 640;
+    view_hview = 480;
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
 

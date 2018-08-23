@@ -15,11 +15,32 @@ const all = -3; // All instances currently active in the room
 const noone = -4; // No instance at all
 
 // FONT CONSTANTS
-const fa_start = "start";
-const fa_end = "end";
-const fa_left = "left";
-const fa_center = "center";
-const fa_right = "right";
+const fa_start = 'start';
+const fa_end = 'end';
+const fa_left = 'left';
+const fa_center = 'center';
+const fa_right = 'right';
+
+// FILTER CONSTANTS
+const fl_blur = 'blur';
+const fl_brightness = 'brightness';
+const fl_contrast = 'contrast';
+const fl_grayscale = 'grayscale';
+const fl_hue = 'hue-rotate';
+const fl_invert = 'invert';
+const fl_opacity = 'opacity';
+const fl_saturate = 'saturate';
+const fl_sepia = 'sepia';
+
+const fl_calc_blur = 'px';
+const fl_calc_brightness = '%';
+const fl_calc_contrast = '%';
+const fl_calc_grayscale = '%';
+const fl_calc_hue = 'deg';
+const fl_calc_invert = '%';
+const fl_calc_opacity = '%';
+const fl_calc_saturate = '%';
+const fl_calc_sepia = '%';
 
 // COLOR CONSTANTS
 const c_red = rgb(255, 0, 0);
@@ -155,7 +176,7 @@ function gameStart()
         if(this.debug_mode)
         {
             draw_set_color(this.text_color);
-            draw_text(view_xview, view_yview, "Instance Count: " + instance_count + "; FPS: " + string(fps));
+            draw_text(view_xview, view_yview, "Obj Count: " + object_count + "; Inst Count: " + instance_count + "; FPS: " + string(fps));
             draw_set_color(c_white);
         }
     }
@@ -379,49 +400,40 @@ function gameObject(x, y, width, height)
                 }
             }
 
-            // Rearrange based on new depth
-            /*if(this.depth != oldDepth)
-            {
-                var ob = gameObjects.indexOf(this.object_id);
-
-                //gameObjects[ob].has_sorted_depth = false;
-                //gameObjects[ob].need_sorted = true;
-                //alert(ob);
-            }*/
-
-            // If the object hasn't sorted by depth
-           // if(this.need_sorted)
-            {
-                this.sort_by_depth();
-            }
+            this.sort_by_depth();
         }
     };
 
     // Sort the instances based on their depth
     this.sort_by_depth = function()
     {
-        //alert("");
         var len = this.instances.length;
-
-        for(var i = len - 1; i >= 0; i -= 1) // Loop through instances
+        if(len > 1)
         {
-            for(var j = 1; j <= i; j += 1)
+            for(var i = len - 1; i >= 0; i -= 1) // Loop through instances
             {
-                var d1 = this.instances[j].depth;
-                var d2 = this.instances[j - 1].depth;
-                if(d2 < d1)
+                for(var j = 1; j <= i; j += 1)
                 {
-                    var temp2 = this.instances[j - 1];
-                    this.instances[j - 1] = this.instances[j];
-                    this.instances[j] = temp2;
+                    var d1 = this.instances[j].depth;
+                    var d2 = this.instances[j - 1].depth;
+                    if(d2 < d1)
+                    {
+                        var temp2 = this.instances[j - 1];
+                        this.instances[j - 1] = this.instances[j];
+                        this.instances[j] = temp2;
+                    }
                 }
             }
+        
+            var al = "";
+            for(var i = 0; i < len; i += 1)
+            {
+                al += this.instances[i].id + '\n';
+                al += this.instances[i].depth + '\n';
+            }
+
+            alert(al);
         }
-
-        //this.instances.sort()
-
-        this.has_sorted_depth = true;
-        this.need_sorted = false;
     }
 
     // The draw called in the game update method (DO NOT OVER WRITE)
@@ -619,23 +631,24 @@ function sprite(im)
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()
 {
-    if(!objectHasSortedDepth())
+    //if(!objectHasSortedDepth())
     {
-    var len = this.gameObjects.length;
+    var len = gameObjects.length;
 
         for(var i = len - 1; i >= 0; i -= 1) // Loop through instances
         {
             for(var j = 1; j <= i; j += 1)
             {
-                if(gameObjects[j].instances.length > 0)
+                //if(gameObjects[j].instances.length > 0)
                 {
-                    var d1 = this.gameObjects[j].instances[0].depth;
-                    var d2 = this.gameObjects[j - 1].instances[0].depth;
+                    gameObjects[j].sort_by_depth();
+                    var d1 = gameObjects[j].instances[0].depth;
+                    var d2 = gameObjects[j - 1].instances[0].depth;
                     if(d2 < d1)
                     {
-                        var temp2 = this.gameObjects[j - 1];
-                        this.gameObjects[j - 1] = this.gameObjects[j];
-                        this.gameObjects[j] = temp2;
+                        var temp2 = gameObjects[j - 1];
+                        gameObjects[j - 1] = gameObjects[j];
+                        gameObjects[j] = temp2;
                     }
                 }
             }
@@ -668,7 +681,6 @@ function updateGameArea()
     var oldViewAngle = view_angle; // Store the view angle
     var oldViewW = view_wview;
     var oldViewH = view_hview;
-    sortObjectsByDepth();
     if(context != game.context)
     {
         context = game.context;
@@ -731,6 +743,7 @@ function updateGameArea()
         }
 
         view_angle % 360;*/
+        sortObjectsByDepth();
 
         animationFrame = requestAnimationFrame(updateGameArea);
 		
@@ -859,6 +872,22 @@ function draw_primitive_end(fill)
     {
         context.stroke();
     }
+}
+
+// Set the drawing filter  using fl_* and fl_calc_*
+function draw_set_filter(filter, value, calc_type)
+{
+    var fil = filter.toString() + '(' + value.toString() + calc_type.toString() + ')';
+    //if(context.filter == 'none')
+    //{
+        context.filter = fil;
+    //}
+}
+
+// Reset the drawing filter
+function draw_reset_filter()
+{
+    context.filter = 'none';
 }
 
 // Set the text font, '30' 'Arial' for example
@@ -1247,7 +1276,7 @@ Object.defineProperty(Object.prototype,'Enum', {
 // depth = f3d_depth(x, y, 0);
 function f3d_depth(x, y, aditional_depth)
 {
-    return ((point_distance(view_xview + view_wview / 2, view_yview + view_hview / 2, x, y) / 10) + aditional_depth);
+    return ((point_distance(view_xview + (view_wview / 2), view_yview + (view_hview / 2), x, y) / 10) + aditional_depth);
 }
 
 // To make a better feel of 3d, this function should be used
@@ -1294,6 +1323,16 @@ function f3d_draw_line(x1, y1, z1, x2, y2, z2)
     );
 }
 
+// Draw a text in fake 3d space
+function f3d_draw_text(x, y, z, text)
+{
+    var tempZ = f3d_calculate_z(z);
+    var hor = f3d_get_hor(x);
+    var ver = f3d_get_ver(y);
+
+    draw_text(x - (tempZ * hor), y - (tempZ * ver), text);
+}
+
 // Draw a circle in fake 3d
 function f3d_draw_circle(x, y, z, r, outline)
 {
@@ -1304,6 +1343,7 @@ function f3d_draw_circle(x, y, z, r, outline)
     draw_circle(x - (tempZ * hor), y - (tempZ * ver), r, outline);
 }
 
+// Draw a vertext point in 3D
 function f3d_draw_vertex(x, y, z)
 {
     var zz = f3d_calculate_z(z);

@@ -1,8 +1,8 @@
 //(function() {
-    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-    window.requestAnimationFrame = requestAnimationFrame;
+//    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+//    window.requestAnimationFrame = requestAnimationFrame;
 //})();
-var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+//var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
 // CONSTANTS
 const canvasId = 'canvas';
@@ -59,7 +59,6 @@ const c_purple = rgb(255, 0, 255);
 // HIDDEN GLOBAL VARIABLES
 gameObjects = []; // The game object list
 context = null;
-keys = []; // Keyboard keys
 animationFrame = null; // How we will talk to the animation frame requests
 mx = 0; // Base mouse x
 my = 0; // Base mouse y
@@ -89,24 +88,6 @@ lives = 3;
 instance_count = 0;
 object_count = 0;
 delta_time = 0;
-
-// Input events
-document.body.addEventListener('keydown', function(e) 
-{
-    keys[e.keyCode] = true;
-});
- 
-document.body.addEventListener('keyup', function(e) 
-{
-    keys[e.keyCode] = false;
-});
-
-document.body.addEventListener('mousemove', function(e)
-{
-    var el = document.getElementById('canvasdiv');
-    mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
-    my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
-});
 
 function gameRestart()
 {
@@ -787,6 +768,7 @@ function everyinterval(n)
     return false;
 }
 
+//#newfile BasicDrawing
 
 // DRAWING STUFF
 
@@ -949,6 +931,8 @@ function draw_circle(x, y, r, outline)
 		}
 	}
 }
+
+//#newfile MathHelper
 
 // MATH STUFF
 
@@ -1263,6 +1247,8 @@ function doPolygonsIntersect (a, b) {
     return true;
 };
 
+//#newfile Fake3D
+
 // F3D FUNCTIONS FOR FAKE 3D (Based off w3d by TheSnidr on Game Maker Forums)
 
 // Calculate the natural depth of the instance
@@ -1463,6 +1449,27 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
     f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
 }
 
+//#newfile PlayerInput
+
+keys = []; // Keyboard keys
+
+// Input events
+document.body.addEventListener('keydown', function(e) 
+{
+    keys[e.keyCode] = true;
+});
+ 
+document.body.addEventListener('keyup', function(e) 
+{
+    keys[e.keyCode] = false;
+});
+
+document.body.addEventListener('mousemove', function(e)
+{
+    var el = document.getElementById('canvasdiv');
+    mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
+    my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
+});
 
 // PLAYER INPUT
 function keyboard_check(key)

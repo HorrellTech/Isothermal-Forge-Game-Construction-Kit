@@ -1,9 +1,3 @@
-//(function() {
-//    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
-//    window.requestAnimationFrame = requestAnimationFrame;
-//})();
-//var cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
-
 // CONSTANTS
 const canvasId = 'canvas';
 const pi = Math.PI; // PI
@@ -55,6 +49,11 @@ const c_green = rgb(0, 145, 0);
 const c_yellow = rgb(255, 255, 0);
 const c_orange = rgb(255, 176, 0);
 const c_purple = rgb(255, 0, 255);
+const a_100 = 1.0; // Alpha full
+const a_50 = 0.5; // Alpha half
+const a_0 = 0.0; // Alpha none
+const a_25 = 0.25; // Alpha 1/4
+const a_75 = 0.75; // Alpha 3/4
 
 // HIDDEN GLOBAL VARIABLES
 gameObjects = []; // The game object list
@@ -66,7 +65,6 @@ lastTick = 0; // Last time the frame ticked
 font_size = 12;
 font_style = "Arial";
 globalObj = noone;
-//mouseClick = false;
 
 // GLOBAL VARIABLES
 global = noone; // The global instance
@@ -88,10 +86,11 @@ lives = 3;
 instance_count = 0;
 object_count = 0;
 delta_time = 0;
+time_scale = 1.0; // The time scale can be used for slow motion or game pausing
 
 function gameRestart()
 {
-	gameStart();
+	gameStart(640, 480);
 }
 
 function gameRestartEval()
@@ -99,6 +98,12 @@ function gameRestartEval()
 	var c = document.getElementById('tbcode').value;
 	gameStart();
     execute_string(c);
+}
+
+function room_begin(width, height)
+{
+    room_width = width;
+    room_height = height;
 }
 
 // Scale the canvas relative to it's current size (1 = normal)
@@ -132,10 +137,13 @@ function gameStart()
 {
     cancelAnimationFrame(animationFrame);
     gameObjects = [];
+    room_width = 640;
+    room_height = 480;
     view_xview = 0;
     view_yview = 0;
-    view_wview = 640;
-    view_hview = 480;
+    view_wview = room_width;
+    view_hview = room_height;
+    time_scale = 1.0;
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
 
@@ -152,14 +160,14 @@ function gameStart()
     {
         this.debug_mode = true;
         this.text_color = c_red;
-        this.depth = -99999999;
     }
 
-    globalObj.draw = function()
+    globalObj.draw_gui = function()
     {
         if(this.debug_mode)
         {
             draw_set_color(this.text_color);
+            draw_set_alpha(a_100);
             draw_text(view_xview, view_yview, "Obj Count: " + object_count + "; Inst Count: " + instance_count + "; FPS: " + string(fps));
             draw_set_color(c_white);
         }
@@ -299,8 +307,12 @@ function gameObject(x, y, width, height)
     this.draw = function()
     {};
 
+    // Will be drawn very last, and on top of every normal draw event
+    this.draw_gui = function()
+    {};
+
     // The update called in the game update method (DO NOT OVER WRITE)
-    this.update = function()
+    this.updateMain = function()
     {
         //if(!isParent)
         {
@@ -324,28 +336,28 @@ function gameObject(x, y, width, height)
             // The speed functionality
             if(this.speed != 0)
             {
-                this.hspeed = lengthdir_x(this.speed, this.direction);
-                this.vspeed = lengthdir_y(this.speed, this.direction);
+                this.hspeed = lengthdir_x(this.speed, this.direction) * time_scale;
+                this.vspeed = lengthdir_y(this.speed, this.direction) * time_scale;
             }
 
             // Horizontal speed and vertical speed functionality
             if(this.hspeed != 0)
             {
-                this.x += this.hspeed;
+                this.x += this.hspeed * time_scale;
             }
             if(this.vspeed != 0)
             {
-                this.y += this.vspeed;
+                this.y += this.vspeed * time_scale;
             }
 
             // Gravity functionality
             if(this.gravity != 0)
             {
-                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
-                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
+                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction) * time_scale;
+                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction) * time_scale;
             }
             
-            if(this.object_id.instances[0] == this)
+            if(this.object_id.instances[0] == this) // If we are the first object in the line
             {
                 this.object_id.sort_by_depth();
             }
@@ -358,7 +370,7 @@ function gameObject(x, y, width, height)
             // Friction
             if (this.hspeed > 0)
             {
-                this.hspeed -= this.friction;
+                this.hspeed -= this.friction * time_scale;
                 if(this.hspeed < 0)
                 {
                     this.hspeed = 0;
@@ -366,7 +378,7 @@ function gameObject(x, y, width, height)
             }
             if (this.hspeed < 0)
             {
-                this.hspeed += this.friction;
+                this.hspeed += this.friction * time_scale;
                 if (this.hspeed > 0)
                 {
                     this.hspeed = 0;
@@ -374,7 +386,7 @@ function gameObject(x, y, width, height)
             }
             if (this.vspeed > 0)
             {
-                this.vspeed -= this.friction;
+                this.vspeed -= this.friction * time_scale;
                 if (this.vspeed < 0)
                 {
                     this.vspeed = 0;
@@ -382,7 +394,7 @@ function gameObject(x, y, width, height)
             }
             if (this.vspeed < 0)
             {
-                this.vspeed += this.friction;
+                this.vspeed += this.friction * time_scale;
                 if (this.vspeed > 0)
                 {
                     this.vspeed = 0;
@@ -411,16 +423,6 @@ function gameObject(x, y, width, height)
                     }
                 }
             }
-        
-            var al = "";
-            for(var i = 0; i < len; i += 1)
-            {
-                al += this.instances[i].id + '\n';
-                al += this.instances[i].depth + '\n';
-            }
-
-            //alert(al);
-            //alert(this.instances.length);
         }
     }
 
@@ -430,17 +432,23 @@ function gameObject(x, y, width, height)
         this.draw();
     };
 
+    // This is called after every other event, so everything will be drawn last in this event
+    this.mainDrawGui = function()
+    {
+        this.draw_gui();
+    }
+
     // Add a new instance to this object
     this.instantiate = function(x, y)
     {
         var temp = new gameObject(x, y, this.width, this.height);
         temp.hasWoken = false;
         temp.awake = this.awake;
-        temp.update = this.update;
         temp.loop = this.loop;
         temp.loop_begin = this.loop_begin;
         temp.loop_end = this.loop_end;
         temp.draw = this.draw;
+        temp.draw_gui = this.draw_gui;
         temp.object_id = this;
         temp.id = this.id;
         temp.isParent = false;
@@ -686,7 +694,7 @@ function updateGameArea()
                     var ins = gameObjects[i].instances[j];
                     if(ins != null && ins.active)
                     {
-                        ins.update();
+                        ins.updateMain();
                         insCount += 1;
                     }
                 }
@@ -702,6 +710,20 @@ function updateGameArea()
                     if(ins != null && ins.visible && ins.active)
                     {
                         ins.mainDraw();
+                    }
+                }
+            }
+        }
+        for (var x = 0; x < gameObjects.length; x += 1) 
+        {
+            if(gameObjects[x].instances != null)
+            {
+                for(var y = 0; y < gameObjects[x].instances.length; y += 1)
+                {
+                    var ins = gameObjects[x].instances[y];
+                    if(ins != null && ins.visible && ins.active)
+                    {
+                        ins.mainDrawGui();
                     }
                 }
             }
@@ -786,6 +808,12 @@ function draw_set_color(color)
 {
     context.fillStyle = color;
     context.strokeStyle = color;
+}
+
+// Set the drawing alpha 0.0 - 1.0
+function draw_set_alpha(alpha)
+{
+    context.globalAlpha = alpha;
 }
 
 // Draw a rectangle as outline or filled

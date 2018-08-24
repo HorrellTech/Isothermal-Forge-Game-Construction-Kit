@@ -1211,6 +1211,21 @@ function within_view(x1, y1, x2, y2)
     );
 }
 
+// Create a new vector2
+function vec2(x, y)
+{
+    this.x = x;
+    this.y = y;
+}
+
+// Create a new vector2
+function vec3(x, y, z)
+{
+    this.x = x;
+    this.y = y;
+    this.z = z;
+}
+
 /**
  * Helper function to determine whether there is an intersection between the two polygons described
  * by the lists of vertices. Uses the Separating Axis Theorem

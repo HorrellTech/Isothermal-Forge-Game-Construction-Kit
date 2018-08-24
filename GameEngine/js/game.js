@@ -65,18 +65,23 @@ lastTick = 0; // Last time the frame ticked
 font_size = 12;
 font_style = "Arial";
 globalObj = noone;
+tileLayersLow = []; // Keep track of lower tiles
+tileLayersHigh = []; // Keep track of higher tiles
+tileLayerCount = 1; // We want to have a capped number of tile layers
+tileSizeDefault = 32; // Default tile size
 
 // GLOBAL VARIABLES
 global = noone; // The global instance
 room_speed = 30;
-room_width = 640;
-room_height = 480;
+room_width = 1024;
+room_height = 768;
 background_color = c_ltgray;
+tile_none = new tile(noone, false);
 fps = 0;
 view_xview = 0;
 view_yview = 0;
-view_wview = room_width;
-view_hview = room_height;
+view_wview = 640;
+view_hview = 480;
 view_angle = 0;
 mouse_x = 0;
 mouse_y = 0;
@@ -87,6 +92,8 @@ instance_count = 0;
 object_count = 0;
 delta_time = 0;
 time_scale = 1.0; // The time scale can be used for slow motion or game pausing
+
+
 
 function gameRestart()
 {
@@ -100,12 +107,6 @@ function gameRestartEval()
     execute_string(c);
 }
 
-function room_begin(width, height)
-{
-    room_width = width;
-    room_height = height;
-}
-
 // Scale the canvas relative to it's current size (1 = normal)
 function scaleCanvas(xscale, yscale)
 {
@@ -117,33 +118,28 @@ function scaleCanvas(xscale, yscale)
     }
 }
 
-// Keeps track of the resources loaded in the game
-function resourceManager()
-{
-    var images = [];
-    var sounds = [];
-
-    loadImage = function(src, callback) {
-        var img = document.createElement('img');
-        img.addEventListener('load', function() { callback(img); } , false);
-        img.src = src;
-     }
-}
-
-resm = new resourceManager();
-
 // Start the game
 function gameStart()
 {
     cancelAnimationFrame(animationFrame);
     gameObjects = [];
-    room_width = 640;
-    room_height = 480;
+    room_width = 1024;
+    room_height = 768;
     view_xview = 0;
     view_yview = 0;
-    view_wview = room_width;
-    view_hview = room_height;
+    view_wview = 640;
+    view_hview = 480;
     time_scale = 1.0;
+
+
+    // Initialize the tile layers
+    /*for(var i = 0; i < tileLayerCount; i += 1)
+    {
+        tileLayersLow.push(new tileLayer(room_width / tileSizeDefault, room_height / tileSizeDefault, tileSizeDefault));
+        tileLayersHigh.push(new tileLayer(room_width / tileSizeDefault, room_height / tileSizeDefault, tileSizeDefault));
+    }*/
+
+
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
 
@@ -190,7 +186,6 @@ function skinColor()
         case 2:
             col = ('#FFE39F');
         break;
-
         case 3:
             col = ('#633C1D');
         break;
@@ -207,8 +202,6 @@ var game =
     start : function(width, height, cont) {
         this.canvas.width = width;
         this.canvas.height = height;
-        room_width = width;
-        room_height = height;
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
         updateGameArea();
@@ -231,6 +224,75 @@ var game =
         }
     }
 };
+
+// TILE STUFF
+
+// A layer holding a bunch of tiles for static drawing
+function tileLayer(width, height, tileSize)
+{
+    this.tiles = [,];
+    this.width = width;
+    this.height = height;
+    this.tile_size = tileSize;
+    this.active = true;
+
+    for(var i = 0; i < this.width; i += 1)
+    {
+        for(var j = 0; j < this.height; j += 1)
+        {
+            this.tiles[i, j] = tile_none; 
+        }
+    }
+
+    // Draw the tiles in the tile layer, but only what is visible in the view
+    this.draw = function()
+    {
+        if(this.active)
+        {
+            for(var i = round((view_xview - (this.tile_size * 2)) / this.tile_size); i < round((view_xview + view_wview + (this.tile_size * 2))); i += 1)
+            {
+                for(var j = round((view_yview - (this.tile_size * 2)) / this.tile_size); j < round((view_yview + view_hview + (this.tile_size * 2))); j += 1)
+                {
+                    if(i >= 0 && j >= 0 && i < room_width / this.tile_size && j < room_height / this.tile_size)
+                    {
+                        if(this.tiles[i, j] == tile_none)
+                        {
+                            this.tiles[i, j].draw_debug(i * this.tile_size, j * this.tile_size, this.tile_size, this.tile_size, c_red);
+                        }
+                        else
+                        {
+                            this.tiles[i, j].draw(i * this.tile_size, j * this.tile_size);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Tile for static drawings seperate to objects
+function tile(image, solid)
+{
+    this.image = image;
+    this.solid = solid; // If the standard collision math will treat it as collidable
+
+    // Draw the tile
+    this.draw = function(x, y)
+    {
+        if(this.image != noone)
+        {
+            context.drawImage(this.image, x, y);
+        }
+    };
+
+    // Draw the tile debugged
+    this.draw_debug = function(x, y, w, h, color)
+    {
+        draw_set_color(color);
+            draw_rectangle(x, y, x + w, y + h, true);
+        draw_set_color(c_white);
+    };
+}
 
 // Create an new instance of an object
 function instance_create(x, y, object)
@@ -323,7 +385,6 @@ function gameObject(x, y, width, height)
                 this.xstart = this.x;
                 this.ystart = this.y;
             }
-            var oldDepth = this.depth;
 
             this.xprevious = this.x;
             this.yprevious = this.y;
@@ -343,11 +404,11 @@ function gameObject(x, y, width, height)
             // Horizontal speed and vertical speed functionality
             if(this.hspeed != 0)
             {
-                this.x += this.hspeed * time_scale;
+                this.x += this.hspeed;
             }
             if(this.vspeed != 0)
             {
-                this.y += this.vspeed * time_scale;
+                this.y += this.vspeed;
             }
 
             // Gravity functionality
@@ -366,6 +427,9 @@ function gameObject(x, y, width, height)
 
             // Stop direction from exceeding 360 degrees
             this.direction = (this.direction % 360.0);
+
+            this.hspeed *= -this.friction;
+            this.vspeed *= -this.friction;
 
             // Friction
             if (this.hspeed > 0)
@@ -551,9 +615,15 @@ function gameObject(x, y, width, height)
     }
 
     // Check if the mouse is within the instances bounds
-    this.mouse_over = function()
+    this.mouse_hover = function()
     {
         return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
+    }
+
+    // Check if the mouse is within the instances bounds
+    this.point_inside = function(x, y)
+    {
+        return (x > this.x && y > this.y && x < this.x + this.width && y < this.y + this.height);
     }
 
     // Detect collision with another instance of object type
@@ -596,6 +666,21 @@ function gameObject(x, y, width, height)
 
         return(nearest);
     }
+}
+
+// Return the instance(if any) at the position set
+function instance_position(x, y, object)
+{
+    for(var i = 0; i < object.instances.length; i += 1)
+    {
+        var ins = object.instances[i];
+
+        if(ins.point_inside(x, y))
+        {
+            return (ins);
+        }
+    }
+    return (noone);
 }
 
 function checkCollision(object1, object2)
@@ -683,6 +768,13 @@ function updateGameArea()
     }
 
     game.clear();
+
+    // Draw lower tiles
+    /*for(var i = 0; i < tileLayerCount; i += 1)
+    {
+        tileLayersLow[i].draw();
+    }*/
+
     var insCount = 0; // InstanceCount
         // This is the main game loop
         for (var i = 0; i < gameObjects.length; i += 1) 
@@ -960,6 +1052,47 @@ function draw_circle(x, y, r, outline)
 	}
 }
 
+// Draw a ray, and return a rayInfo about the ray
+function drawRay(id, x, y, stepSize, length, direction, object)
+{
+    var info = new rayInfo();
+    this.id = id;
+    
+    for(var i = 0; i < length; i += stepSize)
+    {
+        var xx = x + lengthdir_x(i, direction);
+        var yy = y + lengthdir_y(i, direction);
+        
+        var ob = noone;
+        if(object != noone)
+        {
+            
+            ob = instance_position(xx, yy, object);
+        }
+
+        if(ob == noone)
+        {
+            draw_line(xx, yy, xx + lengthdir_x(stepSize, direction), yy + lengthdir_y(stepSize, direction));
+        }
+        else
+        {
+            info.hit_instance = ob;
+            info.hit_distance = i;
+            return(info);
+        }
+    }
+
+    
+}
+
+// To hold information about the distance etc of the ray
+function rayInfo()
+{
+    this.hit_instance = noone;
+    this.hit_distance = 0;
+    this.ray_id = 0;
+}
+
 //#newfile MathHelper
 
 // MATH STUFF
@@ -1009,7 +1142,12 @@ function cos(x)
 // Returns the cosine of a number from degrees to radians
 function dcos(x)
 {
-    return(cos(degtorad(x)));
+    return (cos(degtorad(x)));
+}
+
+function sign(x)
+{
+    return (Math.sign(x));
 }
 
 // Returns degrees to radians

@@ -164,7 +164,7 @@ function gameStart()
         {
             draw_set_color(this.text_color);
             draw_set_alpha(a_100);
-            draw_text(view_xview, view_yview, "Obj Count: " + object_count + "; Inst Count: " + instance_count + "; FPS: " + string(fps));
+            draw_text(view_xview, view_yview, "Obj Count: " + object_count + "; Inst Count: " + instance_count + "; FPS: " + fps);
             draw_set_color(c_white);
         }
     }
@@ -292,6 +292,13 @@ function tile(image, solid)
             draw_rectangle(x, y, x + w, y + h, true);
         draw_set_color(c_white);
     };
+}
+
+function surface(width, height)
+{
+    //this.canvas = new Image(width, height);
+
+    
 }
 
 // Create an new instance of an object

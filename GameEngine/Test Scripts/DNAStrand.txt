@@ -1,3 +1,5 @@
+background_color = c_black;
+
 var o = object_add();
 
 o.draw = function()
@@ -5,9 +7,9 @@ o.draw = function()
     for(var i = 0; i < 8; i += 1)
     {
         draw_set_color(c_blue);
-        draw_circle(15 + i * 25, 100 + sin(i - delta_time / 20) * 20, 10, true);
+        draw_circle(15 + i * 25, 100 + sin(i - time_current / 200) * 20, 10, true);
         draw_set_color(c_red);
-        draw_circle(15 + i * 25, 100 - sin(i - delta_time / 20) * 20, 10, true);
+        draw_circle(15 + i * 25, 100 - sin(i - time_current / 200) * 20, 10, true);
     }
 }
 

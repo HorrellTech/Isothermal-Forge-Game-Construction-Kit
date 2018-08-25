@@ -1,8 +1,10 @@
+background_color = c_green;
+
 var o = object_add();
 
 o.draw = function()
 { 
-    depth = f3d_depth(this.x, this.y, 0);
+    this.depth = f3d_depth(this.x, this.y, 0);
 
     draw_set_color(c_dkgray);
     f3d_draw_line(this.x, this.y, 0, this.x + lengthdir_x(32, -45), this.y + lengthdir_y(32, -45), 0);

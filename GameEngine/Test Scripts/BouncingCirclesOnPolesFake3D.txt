@@ -4,12 +4,12 @@ var o = object_add();
 
 o.draw = function() 
 {
-    var p = pulse_positive(100, 200);
+    var p = pulse_positive(900, 200);
 
-    depth = f3d_depth(this.x, this.y, 128);
+    this.depth = f3d_depth(this.x, this.y, 128);
 
     draw_set_color(c_dkgray);
-    f3d_draw_line(this.x, this.y, 0, this.x + lengthdir_x(32, -45), this.y + lengthdir_y(32, -45), 0);
+    f3d_draw_line(this.x, this.y, 0, this.x + lengthdir_x(pulse_positive(900, 100), -45), this.y + lengthdir_y(pulse_positive(900, 100), -45), 0);
     draw_set_color(c_red);
     f3d_draw_line(this.x, this.y, 0, this.x, this.y, p); 
 

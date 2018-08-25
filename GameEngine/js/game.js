@@ -1398,14 +1398,20 @@ function random_bool()
     return (Math.random() >= 0.5);
 }
 
-// Returns a value as a string
-function string(val)
+// Replace every occurance of a string inside another string
+function string_replace_all(str, find, replace) 
+{
+    return (str.replace(new RegExp(escapeRegExp(find), 'g'), replace));
+}
+
+// Returns a value to a string
+function string_to(val)
 {
     return (val.toString());
 }
 
 // Converts a string to an integer
-function real(val)
+function int_to(val)
 {
     return (parseInt(val));
 }

@@ -92,7 +92,7 @@ instance_count = 0;
 object_count = 0;
 delta_time = 0;
 time_scale = 1.0; // The time scale can be used for slow motion or game pausing
-
+time_current = new Date().getTime();
 
 
 function gameRestart()
@@ -333,6 +333,10 @@ function gameObject(x, y, width, height)
     this.ystart = y;
     this.xprevious = x;
     this.yprevious = y;
+    this.bbox_left = 0;
+    this.bbox_top = 0;
+    this.bbox_right = 0;
+    this.bbox_bottom = 0;
     this.depth = 0;
     this.width = width;
     this.height = height;
@@ -346,6 +350,8 @@ function gameObject(x, y, width, height)
 
     this.image_index = 0;
     this.image_number = 1;
+    this.offset_x = 0; // Collision box offset x
+    this.offset_y = 0; // Collision box offset y
 
     this.hasWoken = false;
 
@@ -376,8 +382,6 @@ function gameObject(x, y, width, height)
     // The update called in the game update method (DO NOT OVER WRITE)
     this.updateMain = function()
     {
-        //if(!isParent)
-        {
             if(!this.hasWoken)
             {
                 this.awake();
@@ -386,19 +390,19 @@ function gameObject(x, y, width, height)
                 this.ystart = this.y;
             }
 
+            this.loop_begin();
             this.xprevious = this.x;
             this.yprevious = this.y;
 
             //this.image_index += 1 % this.image_number;
 
-            this.loop_begin();
             this.loop();
 
             // The speed functionality
             if(this.speed != 0)
             {
-                this.hspeed = lengthdir_x(this.speed, this.direction) * time_scale;
-                this.vspeed = lengthdir_y(this.speed, this.direction) * time_scale;
+                this.hspeed = lengthdir_x(this.speed, this.direction);
+                this.vspeed = lengthdir_y(this.speed, this.direction);
             }
 
             // Horizontal speed and vertical speed functionality
@@ -414,8 +418,8 @@ function gameObject(x, y, width, height)
             // Gravity functionality
             if(this.gravity != 0)
             {
-                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction) * time_scale;
-                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction) * time_scale;
+                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
+                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
             }
             
             if(this.object_id.instances[0] == this) // If we are the first object in the line
@@ -423,18 +427,16 @@ function gameObject(x, y, width, height)
                 this.object_id.sort_by_depth();
             }
 
-            this.loop_end();
-
             // Stop direction from exceeding 360 degrees
             this.direction = (this.direction % 360.0);
 
-            this.hspeed *= -this.friction;
-            this.vspeed *= -this.friction;
+            //this.hspeed *= -this.friction;
+            //this.vspeed *= -this.friction;
 
             // Friction
             if (this.hspeed > 0)
             {
-                this.hspeed -= this.friction * time_scale;
+                this.hspeed -= this.friction;
                 if(this.hspeed < 0)
                 {
                     this.hspeed = 0;
@@ -442,7 +444,7 @@ function gameObject(x, y, width, height)
             }
             if (this.hspeed < 0)
             {
-                this.hspeed += this.friction * time_scale;
+                this.hspeed += this.friction;
                 if (this.hspeed > 0)
                 {
                     this.hspeed = 0;
@@ -450,7 +452,7 @@ function gameObject(x, y, width, height)
             }
             if (this.vspeed > 0)
             {
-                this.vspeed -= this.friction * time_scale;
+                this.vspeed -= this.friction;
                 if (this.vspeed < 0)
                 {
                     this.vspeed = 0;
@@ -458,13 +460,20 @@ function gameObject(x, y, width, height)
             }
             if (this.vspeed < 0)
             {
-                this.vspeed += this.friction * time_scale;
+                this.vspeed += this.friction;
                 if (this.vspeed > 0)
                 {
                     this.vspeed = 0;
                 }
             }
-        }
+
+            // Collision positions
+            this.bbox_left = this.x - this.offset_x;
+            this.bbox_top = this.y - this.offset_y;
+            this.bbox_right = this.bbox_left + this.width;
+            this.bbox_bottom = this.bbox_top + this.height;
+
+            this.loop_end();
     };
 
     // Sort the instances based on their depth
@@ -626,6 +635,135 @@ function gameObject(x, y, width, height)
         return (x > this.x && y > this.y && x < this.x + this.width && y < this.y + this.height);
     }
 
+    // If there is an instance at the location hor or ver, push self in the opposite direction at the amount until there is no longer a collision
+    this.jump_outside = function(hor, ver, amount, object)
+    {
+        var ret;
+        ret = false;
+
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            var ins = object.instances[i];
+
+            if(ins.active && this.active)
+            {
+                    if(hor > 0)
+                    {
+                        while(checkCollision(this, ins))
+                        this.x -= amount;
+                    }
+                    if(hor < 0)
+                    {
+                        while(checkCollision(this, ins))
+                        this.x += amount;
+                    }
+                    if(ver > 0)
+                    {
+                        while(checkCollision(this, ins))
+                        this.y -= amount;
+                    }
+                    if(ver < 0)
+                    {
+                        while(checkCollision(this, ins))
+                        this.y += amount;
+                    }
+            }
+        }
+    }
+
+    // If there is an instance at the location hor or ver, push self in the opposite direction at the amount until there is no longer a collision
+    this.push_outside = function(hor, ver, amount, object)
+    {
+        var ret;
+        ret = false;
+
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            var ins = object.instances[i];
+
+            if(ins.active && this.active)
+            {
+                if(checkCollision(this, ins))
+                {
+                    if(hor > 0)
+                    {
+                        this.x -= amount;
+                    }
+                    if(hor < 0)
+                    {
+                        this.x += amount;
+                    }
+                    if(ver > 0)
+                    {
+                        this.y -= amount;
+                    }
+                    if(ver < 0)
+                    {
+                        this.y += amount;
+                    }
+                }
+            }
+        }
+    }
+
+    // Return if there is a collision with an instance
+    this.place_meeting = function(x, y, object)
+    {
+        var xOld, yOld, ret;
+        ret = false;
+        xOld = this.x;
+        yOld = this.y;
+
+        this.x = x;
+        this.y = y;
+
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            var ins = object.instances[i];
+
+            if(ins.active && this.active)
+            {
+                if(checkCollision(this, ins))
+                {
+                    ret = true;
+                }
+            }
+        }
+        this.x = xOld;
+        this.y = yOld;
+
+        return (ret);
+    }
+
+    // Return a collision with an instance and return the instance
+    this.instance_place = function(x, y, object)
+    {
+        var xOld, yOld, ret;
+        ret = noone;
+        xOld = this.x;
+        yOld = this.y;
+
+        this.x = x;
+        this.y = y;
+
+        for(var i = 0; i < object.instances.length; i += 1)
+        {
+            var ins = object.instances[i];
+
+            if(ins.active && this.active)
+            {
+                if(collision_with(ins))
+                {
+                    ret = ins;
+                }
+            }
+        }
+        this.x = xOld;
+        this.y = yOld;
+
+        return (ret);
+    }
+
     // Detect collision with another instance of object type
     this.collision_with = function(object)
     {
@@ -683,11 +821,12 @@ function instance_position(x, y, object)
     return (noone);
 }
 
+
 function checkCollision(object1, object2)
     {
         if(object1.active && object2.active)
         {
-            if(object1.x < object2.x + object2.width  && object1.x + object1.width  > object2.x &&
+            if(object1.x < object2.x + object2.width  && object1.x+ object1.width  > object2.x &&
             object1.y < object2.y + object2.height && object1.y + object1.height > object2.y)
             {
                 return(true);
@@ -759,6 +898,8 @@ function updateGameArea()
     lastTick = new Date().getTime();
     fps = ceil(1 / delta);
 
+    time_current = new Date().getTime();
+
     var oldViewAngle = view_angle; // Store the view angle
     var oldViewW = view_wview;
     var oldViewH = view_hview;
@@ -784,7 +925,7 @@ function updateGameArea()
                 for(var j = 0; j < gameObjects[i].instances.length; j += 1)
                 {
                     var ins = gameObjects[i].instances[j];
-                    if(ins != null && ins.active)
+                    if(ins.active)
                     {
                         ins.updateMain();
                         insCount += 1;
@@ -799,7 +940,7 @@ function updateGameArea()
                 for(var y = 0; y < gameObjects[x].instances.length; y += 1)
                 {
                     var ins = gameObjects[x].instances[y];
-                    if(ins != null && ins.visible && ins.active)
+                    if(ins.visible && ins.active)
                     {
                         ins.mainDraw();
                     }
@@ -813,7 +954,7 @@ function updateGameArea()
                 for(var y = 0; y < gameObjects[x].instances.length; y += 1)
                 {
                     var ins = gameObjects[x].instances[y];
-                    if(ins != null && ins.visible && ins.active)
+                    if(ins.visible && ins.active)
                     {
                         ins.mainDrawGui();
                     }
@@ -848,8 +989,6 @@ function updateGameArea()
         sortObjectsByDepth();
 
         animationFrame = requestAnimationFrame(updateGameArea);
-		
-		delta_time += 1 % 2;
 }
 
 // Gets the number of instances of the given object
@@ -1269,21 +1408,21 @@ function real(val)
 */
 function pulse(delay, max)
 {
-    var val = sin(delta_time / delay) * max;
+    var val = sin(time_current / delay) * max;
 	return (val);
 }
 
 // Returns a value pulsing at the rate of delay from 0 to a maximum number
 function pulse_positive(delay, max)
 {
-	var val = sin(delta_time / delay) * max;
+	var val = sin(time_current / delay) * max;
 	return (keep_positive(val));
 }
 
 // Returns a value pulsing at the rate of delay from 0 to a maximum number
 function pulse_negative(delay, max)
 {
-	var val = sin(delta_time / delay) * max;
+	var val = sin(time_current / delay) * max;
 	return (keep_negative(val));
 }
 

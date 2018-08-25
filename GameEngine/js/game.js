@@ -323,6 +323,7 @@ function gameObject(x, y, width, height)
     this.need_removed = false;
     this.has_sorted_depth = true;
     this.need_sorted = false;
+    this.use_built_in_physics = true;
 
     this.active = true;
     this.visible = true;
@@ -398,29 +399,44 @@ function gameObject(x, y, width, height)
 
             this.loop();
 
-            // The speed functionality
-            if(this.speed != 0)
+            if(this.use_built_in_physics)
             {
-                this.hspeed = lengthdir_x(this.speed, this.direction);
-                this.vspeed = lengthdir_y(this.speed, this.direction);
-            }
+                // The speed functionality
+                if(this.speed != 0)
+                {
+                    this.hspeed = lengthdir_x(this.speed, this.direction);
+                    this.vspeed = lengthdir_y(this.speed, this.direction);
+                }
 
-            // Horizontal speed and vertical speed functionality
-            if(this.hspeed != 0)
-            {
-                this.x += this.hspeed;
-            }
-            if(this.vspeed != 0)
-            {
-                this.y += this.vspeed;
-            }
+                // Horizontal speed and vertical speed functionality
+                if(this.hspeed != 0)
+                {
+                    this.x += this.hspeed * time_scale;
+                }
+                if(this.vspeed != 0)
+                {
+                    this.y += this.vspeed * time_scale;
+                }
 
-            // Gravity functionality
-            if(this.gravity != 0)
-            {
-                this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
-                this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
-            }
+                // Gravity functionality
+                if(this.gravity != 0)
+                {
+                    this.hspeed += lengthdir_x(this.gravity, this.gravity_direction);
+                    this.vspeed += lengthdir_y(this.gravity, this.gravity_direction);
+                }
+
+                // Have the friction work like game maker
+                if(this.friction > 0)
+                {
+                    this.hspeed *= ceil(this.friction) - this.friction;
+                    this.vspeed *= ceil(this.friction) - this.friction;
+                }
+                else
+                {
+                    this.hspeed *= 1 - this.friction;
+                    this.vspeed *= 1 - this.friction;
+                }
+            }            
             
             if(this.object_id.instances[0] == this) // If we are the first object in the line
             {
@@ -429,43 +445,6 @@ function gameObject(x, y, width, height)
 
             // Stop direction from exceeding 360 degrees
             this.direction = (this.direction % 360.0);
-
-            //this.hspeed *= -this.friction;
-            //this.vspeed *= -this.friction;
-
-            // Friction
-            if (this.hspeed > 0)
-            {
-                this.hspeed -= this.friction;
-                if(this.hspeed < 0)
-                {
-                    this.hspeed = 0;
-                }
-            }
-            if (this.hspeed < 0)
-            {
-                this.hspeed += this.friction;
-                if (this.hspeed > 0)
-                {
-                    this.hspeed = 0;
-                }
-            }
-            if (this.vspeed > 0)
-            {
-                this.vspeed -= this.friction;
-                if (this.vspeed < 0)
-                {
-                    this.vspeed = 0;
-                }
-            }
-            if (this.vspeed < 0)
-            {
-                this.vspeed += this.friction;
-                if (this.vspeed > 0)
-                {
-                    this.vspeed = 0;
-                }
-            }
 
             // Collision positions
             this.bbox_left = this.x - this.offset_x;
@@ -635,8 +614,41 @@ function gameObject(x, y, width, height)
         return (x > this.x && y > this.y && x < this.x + this.width && y < this.y + this.height);
     }
 
+    // Move the object
+    this.move_contact = function(dir, maxdist, object)
+    {
+        var dist = 1000;
+        if(maxdist == 0 || maxdist == -1)
+        {
+            dist = 1000;
+        }
+        else
+        {
+            dist = maxdist;
+        }
+            for(var i = 0; i < dist; i += 1)
+            {
+                this.x += lengthdir_x(1, dir);
+                this.y += lengthdir_y(1, dir);
+
+                for(var j = 0; j < object.instances.length; j += 1)
+                {
+                    var ins = object.instances[j];
+
+                    if(ins.active && this.active)
+                    {
+                        if(checkCollision(this, ins))
+                        {
+                            return (true);
+                        }
+                    }
+                }
+            }
+        return(false);
+    }
+
     // If there is an instance at the location hor or ver, push self in the opposite direction at the amount until there is no longer a collision
-    this.jump_outside = function(hor, ver, amount, object)
+    this.jump_outside = function(amount, object)
     {
         var ret;
         ret = false;
@@ -647,32 +659,18 @@ function gameObject(x, y, width, height)
 
             if(ins.active && this.active)
             {
-                    if(hor > 0)
-                    {
-                        while(checkCollision(this, ins))
-                        this.x -= amount;
-                    }
-                    if(hor < 0)
-                    {
-                        while(checkCollision(this, ins))
-                        this.x += amount;
-                    }
-                    if(ver > 0)
-                    {
-                        while(checkCollision(this, ins))
-                        this.y -= amount;
-                    }
-                    if(ver < 0)
-                    {
-                        while(checkCollision(this, ins))
-                        this.y += amount;
-                    }
+                while(checkCollision(this, ins))
+                {
+                    var dir = point_direction(ins.bbox_right / 2, ins.bbox_bottom / 2, this.bbox_right / 2, this.bbox_bottom / 2);
+                    this.x = this.x + lengthdir_x(amount, dir);
+                    this.y = this.y + lengthdir_y(amount, dir);
+                }
             }
         }
     }
 
     // If there is an instance at the location hor or ver, push self in the opposite direction at the amount until there is no longer a collision
-    this.push_outside = function(hor, ver, amount, object)
+    this.push_outside = function(amount, object)
     {
         var ret;
         ret = false;
@@ -685,22 +683,9 @@ function gameObject(x, y, width, height)
             {
                 if(checkCollision(this, ins))
                 {
-                    if(hor > 0)
-                    {
-                        this.x -= amount;
-                    }
-                    if(hor < 0)
-                    {
-                        this.x += amount;
-                    }
-                    if(ver > 0)
-                    {
-                        this.y -= amount;
-                    }
-                    if(ver < 0)
-                    {
-                        this.y += amount;
-                    }
+                    var dir = point_direction(ins.bbox_right / 2, ins.bbox_bottom / 2, this.bbox_right / 2, this.bbox_bottom / 2);
+                    this.x = this.x + lengthdir_x(amount, dir);
+                    this.y = this.y + lengthdir_y(amount, dir);
                 }
             }
         }
@@ -803,6 +788,29 @@ function gameObject(x, y, width, height)
         }
 
         return(nearest);
+    }
+}
+
+// Set the view centered to a position with a smootheness value(8 is a good smoothness value)
+function view_center_position(x, y, smoothness)
+{
+    if(smoothness == 0)
+    {
+        view_xview = x - (view_wview / 2);
+        view_yview = y - (view_hview / 2);
+    }
+    else
+    {
+        var xx, yy, xt, yt, dir, dist;
+        xx = view_xview + (view_wview / 2); // Center X position
+        yy = view_yview + (view_hview / 2); // Center Y position
+        xt = x;
+        yt = y;
+        dir = point_direction(xx, yy, xt, yt);
+        dist = point_distance(xx, yy, xt, yt);
+        
+        view_xview = (xx + lengthdir_x((dist / smoothness), dir)) - (view_wview / 2);
+    view_yview = (yy + lengthdir_y((dist / smoothness), dir)) - (view_hview / 2);
     }
 }
 
@@ -1794,7 +1802,9 @@ document.body.addEventListener('mousemove', function(e)
 // PLAYER INPUT
 function keyboard_check(key)
 {
-    return(keys[key]);
+    var v = keys[key];
+    
+    return (v);
 }
 
 // KEYBOARD KEYS

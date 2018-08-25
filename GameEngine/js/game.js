@@ -57,6 +57,8 @@ const a_75 = 0.75; // Alpha 3/4
 
 // HIDDEN GLOBAL VARIABLES
 gameObjects = []; // The game object list
+surfaces = []; // List holding the surfaces in the game
+surfaceTarget = noone; // The current target surface
 context = null;
 animationFrame = null; // How we will talk to the animation frame requests
 mx = 0; // Base mouse x
@@ -294,11 +296,44 @@ function tile(image, solid)
     };
 }
 
+// Create a new surface
+function surface_create(width, height)
+{
+    var s = new surface(width, height);
+
+    surfaces.push(s);
+
+    return (s);
+}
+
+// Draw a surface
+function surface_draw(surface, x, y)
+{
+    surface.drawMain(x, y);
+}
+
+// Set the target drawing surface
+function surface_set_target(surface)
+{
+    surfaceTarget = surface;
+}
+
+// Reset the target drawing surface
+function surface_reset_target()
+{
+    surfaceTarget = noone;
+}
+
+// Surface object
 function surface(width, height)
 {
-    //this.canvas = new Image(width, height);
+    this.canvas = new Image(width, height);
 
-    
+    // Draw the surface itself
+    this.drawMain = function(x, y)
+    {
+        context.drawImage(this.canvas, x, y);
+    }
 }
 
 // Create an new instance of an object

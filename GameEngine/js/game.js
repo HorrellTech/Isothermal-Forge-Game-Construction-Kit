@@ -125,6 +125,15 @@ function gameStart()
 {
     cancelAnimationFrame(animationFrame);
     gameObjects = [];
+
+    surfaceTarget = noone;
+    for(var i = 0; i < surfaces.length; i += 1)
+    {
+        //alert('');
+        surface_free(surfaces[i]);
+    }
+
+    surfaces = [];
     room_width = 1024;
     room_height = 768;
     view_xview = 0;
@@ -204,6 +213,7 @@ var game =
     start : function(width, height, cont) {
         this.canvas.width = width;
         this.canvas.height = height;
+        this.canvas.style.zIndex = 0;
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
         updateGameArea();
@@ -299,11 +309,20 @@ function tile(image, solid)
 // Create a new surface
 function surface_create(width, height)
 {
-    var s = new surface(width, height);
+    var s = new surface(surfaces.length, width, height);
 
     surfaces.push(s);
 
     return (s);
+}
+
+// Remove a surface from the canvas
+function surface_free(surface)
+{
+    if(surface != null)
+    {
+        game.canvas.removeChild(surface.canvas);
+    }
 }
 
 // Draw a surface
@@ -315,7 +334,7 @@ function surface_draw(surface, x, y)
 // Set the target drawing surface
 function surface_set_target(surface)
 {
-    surfaceTarget = surface;
+    surfaceTarget = surface.canvas.getContext('2d');
 }
 
 // Reset the target drawing surface
@@ -325,14 +344,33 @@ function surface_reset_target()
 }
 
 // Surface object
-function surface(width, height)
+function surface(id, width, height)
 {
-    this.canvas = new Image(width, height);
+    this.canvas = document.createElement('canvas'); // Create a new canvas
+    this.canvas.id = 'surface' + id.toString();
+    this.canvas.width = width;
+    this.canvas.height = height;
+    this.canvas.style.zIndex = id;
+    //this.canvas.visibility = 'hidden';
+    //this.canvas.oncontextmenu = function(e){ return false; };
+    game.canvas.appendChild(this.canvas);
+
+    
+    var ctx = this.canvas.getContext("2d");
+    ctx.fillStyle = "rgba(255, 0, 0, 0.2)";
+    ctx.fillRect(100, 100, 200, 200);
+    ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+    ctx.fillRect(150, 150, 200, 200);
+    ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
+    ctx.fillRect(200, 50, 200, 200);
 
     // Draw the surface itself
     this.drawMain = function(x, y)
     {
-        context.drawImage(this.canvas, x, y);
+        this.canvas.visibility = 'visible';
+        this.canvas.style.left = x.toString() + 'px';
+        this.canvas.style.top = y.toString() + 'px';
+        this.canvas.position = 'absolute';
     }
 }
 
@@ -1087,8 +1125,16 @@ function rgb(r, g, b)
 // Set the drawing color
 function draw_set_color(color)
 {
-    context.fillStyle = color;
-    context.strokeStyle = color;
+    if(surfaceTarget == noone)
+    {
+        context.fillStyle = color;
+        context.strokeStyle = color;
+    }
+    else
+    {
+        surfaceTarget.fillStyle = color;
+        surfaceTarget.strokeStyle = color;
+    }
 }
 
 // Set the drawing alpha 0.0 - 1.0
@@ -1139,11 +1185,23 @@ function draw_rectangle_color(x1, y1, x2, y2, col1, col2, outline)
 // Draw a line from one point to another
 function draw_line(x1, y1, x2, y2)
 {
-    context.beginPath();
-    context.moveTo(x1 - view_xview, y1 - view_yview);
-    context.lineTo(x2 - view_xview, y2 - view_yview);
-    context.stroke();
-    context.closePath();
+    if(surfaceTarget == noone)
+    {
+        context.beginPath();
+        context.moveTo(x1 - view_xview, y1 - view_yview);
+        context.lineTo(x2 - view_xview, y2 - view_yview);
+        context.stroke();
+        context.closePath();
+    }
+    else
+    {
+        var ctx = surfaceTarget;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.closePath();
+    }
 }
 
 // Start drawing a primivite shape, from the x and y position

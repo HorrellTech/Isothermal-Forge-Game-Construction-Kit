@@ -21,7 +21,7 @@
             border: 0px;
         }
 
-        canvas {
+        .gcanvas {
             image-rendering: optimizeSpeed;
             -webkit-interpolation-mode: nearest-neighbor;
             margin: auto;
@@ -98,7 +98,7 @@
         <textarea rows='10' id='tbcode' onkeyup='gameRestartEval()'></textarea>
     </div>
     <div id='canvasdiv' class='split right'>
-        <canvas id='canvas'></canvas>
+        <canvas id='canvas' class='gcanvas'></canvas>
     </div>
 
     <script type="text/javascript" src="js/game.js"></script>

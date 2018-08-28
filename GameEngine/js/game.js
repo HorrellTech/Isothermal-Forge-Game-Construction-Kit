@@ -15,27 +15,6 @@ const fa_left = 'left';
 const fa_center = 'center';
 const fa_right = 'right';
 
-// FILTER CONSTANTS
-const fl_blur = 'blur';
-const fl_brightness = 'brightness';
-const fl_contrast = 'contrast';
-const fl_grayscale = 'grayscale';
-const fl_hue = 'hue-rotate';
-const fl_invert = 'invert';
-const fl_opacity = 'opacity';
-const fl_saturate = 'saturate';
-const fl_sepia = 'sepia';
-
-const fl_calc_blur = 'px';
-const fl_calc_brightness = '%';
-const fl_calc_contrast = '%';
-const fl_calc_grayscale = '%';
-const fl_calc_hue = 'deg';
-const fl_calc_invert = '%';
-const fl_calc_opacity = '%';
-const fl_calc_saturate = '%';
-const fl_calc_sepia = '%';
-
 // BLEND MODE CONSTANTS
 const bm_normal = '';
 const bm_xor = 'xor';
@@ -1074,10 +1053,12 @@ function updateGameArea()
         // If the view angle has changed, change the canvas angle
         /*if(oldViewAngle != view_angle)
         {
+            draw_transform_begin();
             context.translate(game.canvas.width / 2, game.canvas.height / 2);
             context.rotate(degtorad(view_angle));
             context.translate(-game.canvas.width / 2, -game.canvas.height / 2);
-        }
+            draw_transform_end();
+        }*/
 
         if(oldViewH != view_hview)
         {
@@ -1088,7 +1069,7 @@ function updateGameArea()
             game.canvas.width = view_wview;
         }
 
-        view_angle % 360;*/
+        view_angle % 360;
         sortObjectsByDepth();
 
         animationFrame = requestAnimationFrame(updateGameArea);
@@ -1173,6 +1154,60 @@ function draw_set_color(color)
 function draw_set_alpha(alpha)
 {
     surfaceTarget.globalAlpha = alpha;
+}
+
+// Set the transform for the drawing
+function draw_transform_begin()
+{
+    surfaceTarget.save();
+}
+
+// Scale the draw transform
+function draw_transform_scale(x, y)
+{
+    surfaceTarget.scale(x, y);
+}
+
+// Rotate the draw transform
+function draw_transform_rotate(angle)
+{
+    surfaceTarget.rotate(angle);
+}
+
+// Transform the transform
+function draw_transform_transform(m11, m12, m21, m22, dx, dy)
+{
+    surfaceTarget.transform(m11, m12, m21, m22, dx, dy);
+}
+
+// Transform the transform
+function draw_transform_set_transform(m11, m12, m21, m22, dx, dy)
+{
+    surfaceTarget.setTransform(m11, m12, m21, m22, dx, dy);
+}
+
+// Get the transform
+function draw_transform_get()
+{
+    return (surfaceTarget.getTransform());
+}
+
+// Translate the draw transform
+function draw_transform_translate(x, y)
+{
+    surfaceTarget.translate(x, y);
+}
+
+// Reset the transform
+function draw_transform_reset()
+{
+    surfaceTarget.resetTransform();
+}
+
+// Reset the transform
+function draw_transform_end()
+{
+    surfaceTarget.restore();
 }
 
 // Clear the canvas/surface with a color

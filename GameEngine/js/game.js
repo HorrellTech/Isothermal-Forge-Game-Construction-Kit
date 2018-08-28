@@ -1118,6 +1118,14 @@ function rgb(r, g, b)
     return ["rgb(",r,",",g,",",b,")"].join("");
 }
 
+function hsl(h, s, l)
+{
+    r = Math.floor(h);
+    g = Math.floor(s) * 100;
+    b = Math.floor(l) * 100;
+    return ["hsl(",r,",",g,"%,",b,"%)"].join("");
+}
+
 // Set the drawing blend mode
 function draw_set_blend_mode(blendMode)
 {

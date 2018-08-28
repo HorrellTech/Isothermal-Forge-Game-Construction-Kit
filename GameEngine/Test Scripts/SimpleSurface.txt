@@ -1,0 +1,25 @@
+background_color = c_green;
+
+var o = object_add();
+
+o.awake = function()
+{
+    this.s = surface_create(view_wview, view_hview);
+}
+
+o.loop = function()
+{
+    surface_set_target(this.s);
+        draw_clear_alpha(c_black, 0.9);
+        draw_set_blend_mode(bm_dest_out);
+        draw_circle_color(mouse_x, mouse_y, 64, c_white, c_black, false);
+        draw_set_blend_mode(bm_normal);
+    surface_reset_target();
+}
+
+o.draw = function()
+{
+    surface_draw(this.s, view_xview, view_yview);
+}
+
+instance_create(0, 0, o);

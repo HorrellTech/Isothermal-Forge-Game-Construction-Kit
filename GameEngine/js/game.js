@@ -16,7 +16,7 @@ const fa_center = 'center';
 const fa_right = 'right';
 
 // BLEND MODE CONSTANTS
-const bm_normal = '';
+const bm_normal = 'source-over';
 const bm_xor = 'xor';
 const bm_src_in = 'source-in';
 const bm_src_out = 'source-out';
@@ -27,7 +27,21 @@ const bm_dest_out = 'destination-out';
 const bm_dest_atop = 'destination-atop';
 const bm_dest_over = 'destination-over';
 const bm_add = 'lighter';
+const bm_lighten = 'lighten';
+const bm_overlay = 'overlay';
 const bm_copy = 'copy';
+const bm_multiply = 'multiply';
+const bm_darken = 'darken';
+const bm_difference = 'difference';
+const bm_luminosity = 'luminosity';
+const bm_color = 'color';
+const bm_screen = 'screen';
+const bm_softlight = 'soft-light';
+const bm_exclusion = 'exclusion';
+const bm_hardlight = 'hard-light';
+const bm_saturation = 'saturation';
+const bm_colorburn = 'color-burn';
+const bm_colordodge = 'color-dodge';
 
 // COLOR CONSTANTS
 const c_red = rgb(255, 0, 0);
@@ -339,6 +353,12 @@ function surface_set_target(surface)
 function surface_reset_target()
 {
     surfaceTarget = context;
+}
+
+
+function surface_exists(surface)
+{
+    return(surface.canvas != null);
 }
 
 // Surface object
@@ -1243,6 +1263,8 @@ function draw_clear(color)
     var h = surfaceTarget.canvas.height;
     var oldColor = surfaceTarget.fillStyle;
 
+    surfaceTarget.clearRect(0, 0, w, h);
+
     draw_set_color(color);
     draw_rectangle(0, 0, w, h);
     draw_set_color(oldColor);
@@ -1255,6 +1277,8 @@ function draw_clear_alpha(color, alpha)
     var h = surfaceTarget.canvas.height;
     var oldColor = surfaceTarget.fillStyle;
     var oldAlpha = surfaceTarget.globalAlpha;
+
+    surfaceTarget.clearRect(0, 0, w, h);
 
     draw_set_color(color);
     draw_set_alpha(alpha);
@@ -1404,6 +1428,37 @@ function draw_circle(x, y, r, outline)
 			surfaceTarget.fill();
 			surfaceTarget.lineWidth = oldLineWidth;
 		}
+	}
+}
+
+// Draw a circle
+function draw_circle_color(x, y, r, color1, color2, outline)
+{
+	if(r > 0)
+	{
+        var fsOld;
+        fsOld = surfaceTarget.fillStyle;
+        surfaceTarget.beginPath();
+        var grad = surfaceTarget.createRadialGradient(x, y, 1, x, y, r);
+        grad.addColorStop(0, color1);
+        grad.addColorStop(1, color2);
+		if(outline)
+		{
+			surfaceTarget.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+			surfaceTarget.closePath();
+			surfaceTarget.stroke();
+		}
+		else
+		{
+			var oldLineWidth = surfaceTarget.lineWidth;
+			surfaceTarget.lineWidth = 0;
+			surfaceTarget.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+            surfaceTarget.closePath();
+            surfaceTarget.fillStyle = grad;
+			surfaceTarget.fill();
+			surfaceTarget.lineWidth = oldLineWidth;
+        }
+        surfaceTarget.fillStyle = fsOld;
 	}
 }
 

@@ -124,12 +124,12 @@ function scaleCanvas(xscale, yscale)
 function gameStart()
 {
     cancelAnimationFrame(animationFrame);
+    surfaceTarget = context;
     gameObjects = [];
 
     surfaceTarget = noone;
     for(var i = 0; i < surfaces.length; i += 1)
     {
-        //alert('');
         surface_free(surfaces[i]);
     }
 
@@ -142,14 +142,12 @@ function gameStart()
     view_hview = 480;
     time_scale = 1.0;
 
-
     // Initialize the tile layers
     /*for(var i = 0; i < tileLayerCount; i += 1)
     {
         tileLayersLow.push(new tileLayer(room_width / tileSizeDefault, room_height / tileSizeDefault, tileSizeDefault));
         tileLayersHigh.push(new tileLayer(room_width / tileSizeDefault, room_height / tileSizeDefault, tileSizeDefault));
     }*/
-
 
     game.start(view_wview, view_hview, '2d');
     lastTick = new Date().getTime();
@@ -216,6 +214,7 @@ var game =
         this.canvas.style.zIndex = 0;
         this.cont = cont;
         this.context = this.canvas.getContext(cont);
+        surfaceTarget = this.context;
         updateGameArea();
         view_angle = 0;
         },
@@ -321,7 +320,7 @@ function surface_free(surface)
 {
     if(surface != null)
     {
-        game.canvas.removeChild(surface.canvas);
+        surface.free();
     }
 }
 
@@ -329,6 +328,12 @@ function surface_free(surface)
 function surface_draw(surface, x, y)
 {
     surface.drawMain(x, y);
+}
+
+// Draw a surface extended
+function surface_draw_ext(surface, x, y, width, height)
+{
+    surface.drawMainExt(x, y, width, height);
 }
 
 // Set the target drawing surface
@@ -340,7 +345,7 @@ function surface_set_target(surface)
 // Reset the target drawing surface
 function surface_reset_target()
 {
-    surfaceTarget = noone;
+    surfaceTarget = context;
 }
 
 // Surface object
@@ -351,18 +356,22 @@ function surface(id, width, height)
     this.canvas.width = width;
     this.canvas.height = height;
     this.canvas.style.zIndex = id;
-    //this.canvas.visibility = 'hidden';
-    //this.canvas.oncontextmenu = function(e){ return false; };
-    game.canvas.appendChild(this.canvas);
 
     // Draw the surface itself
     this.drawMain = function(x, y)
     {
-        //this.canvas.visibility = 'visible';
-        //this.canvas.style.left = x.toString() + 'px';
-        //this.canvas.style.top = y.toString() + 'px';
-        //this.canvas.position = 'absolute';
         context.drawImage(this.canvas, x, y);
+    }
+
+    // Draw the surface itself
+    this.drawMainExt = function(x, y, width, height)
+    {
+        context.drawImage(this.canvas, x, y, width, height);
+    }
+
+    this.free = function()
+    {
+        this.canvas = null;
     }
 }
 
@@ -1117,108 +1126,115 @@ function rgb(r, g, b)
 // Set the drawing color
 function draw_set_color(color)
 {
-    if(surfaceTarget == noone)
-    {
-        context.fillStyle = color;
-        context.strokeStyle = color;
-    }
-    else
-    {
         surfaceTarget.fillStyle = color;
         surfaceTarget.strokeStyle = color;
-    }
 }
 
 // Set the drawing alpha 0.0 - 1.0
 function draw_set_alpha(alpha)
 {
-    context.globalAlpha = alpha;
+    surfaceTarget.globalAlpha = alpha;
+}
+
+// Clear the canvas/surface with a color
+function draw_clear(color)
+{
+    var w = surfaceTarget.canvas.width;
+    var h = surfaceTarget.canvas.height;
+    var oldColor = surfaceTarget.fillStyle;
+
+    draw_set_color(color);
+    draw_rectangle(0, 0, w, h);
+    draw_set_color(oldColor);
+}
+
+// Clear the canvas/surface with a color and an alpha
+function draw_clear_alpha(color, alpha)
+{
+    var w = surfaceTarget.canvas.width;
+    var h = surfaceTarget.canvas.height;
+    var oldColor = surfaceTarget.fillStyle;
+    var oldAlpha = surfaceTarget.globalAlpha;
+
+    draw_set_color(color);
+    draw_set_alpha(alpha);
+    draw_rectangle(0, 0, w, h);
+    draw_set_alpha(oldAlpha);
+    draw_set_color(oldColor);
 }
 
 // Draw a rectangle as outline or filled
 function draw_rectangle(x1, y1, x2, y2, outline)
 {
-    context.beginPath();
+    surfaceTarget.beginPath();
     if(outline)
     {
-        context.strokeRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
+        surfaceTarget.strokeRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
     }
     else
     {
-        context.fillRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
+        surfaceTarget.fillRect(x1 - view_xview, y1 - view_yview, x2 - x1, y2 - y1);
     }   
-    context.closePath();
+    surfaceTarget.closePath();
 }
 
 // Draw a rectangle as outline or filled
 function draw_rectangle_color(x1, y1, x2, y2, col1, col2, outline)
 {
-    context.beginPath();
-    var fillStylePrev = context.fillStyle;
-    var strokeStylePrev = context.strokeStyle;
-    var gradient = context.createLinearGradient(x1, y1, x2, y2);
+    surfaceTarget.beginPath();
+    var fillStylePrev = surfaceTarget.fillStyle;
+    var strokeStylePrev = surfaceTarget.strokeStyle;
+    var gradient = surfaceTarget.createLinearGradient(x1, y1, x2, y2);
     gradient.addColorStop(0, col1);
     gradient.addColorStop(1, col2);
     if(outline)
     {
-        context.strokeStyle = gradient;
-        context.strokeRect(x1, y1, x2 - x1, y2 - y1);
+        surfaceTarget.strokeStyle = gradient;
+        surfaceTarget.strokeRect(x1, y1, x2 - x1, y2 - y1);
     }
     else
     {
-        context.fillStyle = gradient;
-        context.fillRect(x1, y1, x2 - x1, y2 - y1);
+        surfaceTarget.fillStyle = gradient;
+        surfaceTarget.fillRect(x1, y1, x2 - x1, y2 - y1);
     }   
-    context.strokeStyle = strokeStylePrev;
-    context.fillStyle = fillStylePrev;
-    context.closePath();
+    surfaceTarget.strokeStyle = strokeStylePrev;
+    surfaceTarget.fillStyle = fillStylePrev;
+    surfaceTarget.closePath();
 }
 
 // Draw a line from one point to another
 function draw_line(x1, y1, x2, y2)
 {
-    if(surfaceTarget == noone)
-    {
-        context.beginPath();
-        context.moveTo(x1 - view_xview, y1 - view_yview);
-        context.lineTo(x2 - view_xview, y2 - view_yview);
-        context.stroke();
-        context.closePath();
-    }
-    else
-    {
-        var ctx = surfaceTarget;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-        ctx.closePath();
-    }
+        surfaceTarget.beginPath();
+        surfaceTarget.moveTo(x1 - view_xview, y1 - view_yview);
+        surfaceTarget.lineTo(x2 - view_xview, y2 - view_yview);
+        surfaceTarget.stroke();
+        surfaceTarget.closePath();
 }
 
 // Start drawing a primivite shape, from the x and y position
 function draw_primitive_begin()
 {
-    context.beginPath();
+    surfaceTarget.beginPath();
 }
 
 // Point to draw to next
 function draw_vertex(x, y)
 {
-    context.lineTo(x - view_xview, y - view_yview);
+    surfaceTarget.lineTo(x - view_xview, y - view_yview);
 }
 
 // End the primitive and set if it is filled or not
 function draw_primitive_end(fill)
 {
-    context.closePath();
+    surfaceTarget.closePath();
     if(fill)
     {
-        context.fill();
+        surfaceTarget.fill();
     }
     else
     {
-        context.stroke();
+        surfaceTarget.stroke();
     }
 }
 
@@ -1228,42 +1244,42 @@ function draw_set_filter(filter, value, calc_type)
     var fil = filter.toString() + '(' + value.toString() + calc_type.toString() + ')';
     //if(context.filter == 'none')
     //{
-        context.filter = fil;
+        surfaceTarget.filter = fil;
     //}
 }
 
 // Reset the drawing filter
 function draw_reset_filter()
 {
-    context.filter = 'none';
+    surfaceTarget.filter = 'none';
 }
 
 // Set the text font, '30' 'Arial' for example
 function draw_set_font(size, name)
 {
-    context.beginPath();
-    context.font = size.toString() + 'px ' + name;
+    surfaceTarget.beginPath();
+    surfaceTarget.font = size.toString() + 'px ' + name;
     font_size = size;
     font_style = name;
-    context.closePath();
+    surfaceTarget.closePath();
 }
 
 // Align the text using fa_*
 function draw_set_align(align)
 {
-    context.textAlign = align;
+    surfaceTarget.textAlign = align;
 }
 
 // Draw a text to the screen
 function draw_text(x, y, text)
 {
-    context.fillText(text, x - view_xview, y - view_yview + font_size);
+    surfaceTarget.fillText(text, x - view_xview, y - view_yview + font_size);
 }
 
 // Draw a text to the screen
 function draw_text_outline(x, y, text)
 {
-    context.strokeText(text, x - view_xview, y - view_yview + font_size);
+    surfaceTarget.strokeText(text, x - view_xview, y - view_yview + font_size);
 }
 
 // Draw a circle
@@ -1273,20 +1289,20 @@ function draw_circle(x, y, r, outline)
 	{
 		if(outline)
 		{
-			context.beginPath();
-			context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
-			context.closePath();
-			context.stroke();
+			surfaceTarget.beginPath();
+			surfaceTarget.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+			surfaceTarget.closePath();
+			surfaceTarget.stroke();
 		}
 		else
 		{
-			var oldLineWidth = context.lineWidth;
-			context.lineWidth = 0;
-			context.beginPath();
-			context.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
-			context.closePath();
-			context.fill();
-			context.lineWidth = oldLineWidth;
+			var oldLineWidth = surfaceTarget.lineWidth;
+			surfaceTarget.lineWidth = 0;
+			surfaceTarget.beginPath();
+			surfaceTarget.arc(x - view_xview, y - view_yview, r, 0, 2 * pi);
+			surfaceTarget.closePath();
+			surfaceTarget.fill();
+			surfaceTarget.lineWidth = oldLineWidth;
 		}
 	}
 }

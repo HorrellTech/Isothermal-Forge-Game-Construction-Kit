@@ -1218,6 +1218,24 @@ function draw_transform_end()
     surfaceTarget.restore();
 }
 
+// Draw an image
+function draw_image(image, x, y)
+{
+    surfaceTarget.drawImage(image, x, y);
+}
+
+// Draw an image with a set width and height
+function draw_image_ext(image, x, y, width, height)
+{
+    surfaceTarget.drawImage(image, x, y, width, height);
+}
+
+// Draw part of an image
+function draw_image_part(image, x, y, width, height, left, top, right, bottom)
+{
+    surfaceTarget.drawImage(image, left, top, right, bottom, x, y, width, height);
+}
+
 // Clear the canvas/surface with a color
 function draw_clear(color)
 {

@@ -36,6 +36,9 @@ const fl_calc_opacity = '%';
 const fl_calc_saturate = '%';
 const fl_calc_sepia = '%';
 
+// BLEND MODE CONSTANTS
+const bm_xor = 'xor';
+
 // COLOR CONSTANTS
 const c_red = rgb(255, 0, 0);
 const c_white = rgb(255, 255, 255);
@@ -1123,11 +1126,30 @@ function rgb(r, g, b)
     return ["rgb(",r,",",g,",",b,")"].join("");
 }
 
+// Set the color of the shadow
+function draw_set_shadow_color(color)
+{
+    surfaceTarget.shadowColor = color;
+}
+
+// Set the offset of the shadow
+function draw_set_shadow_offset(x, y)
+{
+    surfaceTarget.shadowOffsetX = x;
+    surfaceTarget.shadowOffsetY = y;
+}
+
+// Set the blur of the shadow
+function draw_set_shadow_blur(amount)
+{
+    surfaceTarget.shadowBlur = amount;
+}
+
 // Set the drawing color
 function draw_set_color(color)
 {
-        surfaceTarget.fillStyle = color;
-        surfaceTarget.strokeStyle = color;
+    surfaceTarget.fillStyle = color;
+    surfaceTarget.strokeStyle = color;
 }
 
 // Set the drawing alpha 0.0 - 1.0
@@ -1308,9 +1330,37 @@ function draw_circle(x, y, r, outline)
 }
 
 // Draw a ray, and return a rayInfo about the ray
-function drawRay(id, x, y, stepSize, length, direction, object)
+function ray_cast(id, x, y, stepSize, length, direction, object)
 {
-    var info = new rayInfo();
+    var info = new ray_info();
+    this.id = id;
+    
+    for(var i = 0; i < length; i += stepSize)
+    {
+        var xx = x + lengthdir_x(i, direction);
+        var yy = y + lengthdir_y(i, direction);
+        
+        var ob = noone;
+        if(object != noone)
+        {
+            
+            ob = instance_position(xx, yy, object);
+        }
+
+        
+        
+        if(ob != noone)
+        {
+            info.hit_instance = ob;
+            info.hit_distance = i;
+            return(info);
+        }
+    }
+}
+
+// Draw a ray
+function ray_draw(id, x, y, stepSize, length, direction, object)
+{
     this.id = id;
     
     for(var i = 0; i < length; i += stepSize)
@@ -1331,17 +1381,13 @@ function drawRay(id, x, y, stepSize, length, direction, object)
         }
         else
         {
-            info.hit_instance = ob;
-            info.hit_distance = i;
-            return(info);
+            break;
         }
     }
-
-    
 }
 
 // To hold information about the distance etc of the ray
-function rayInfo()
+function ray_info()
 {
     this.hit_instance = noone;
     this.hit_distance = 0;

@@ -37,7 +37,18 @@ const fl_calc_saturate = '%';
 const fl_calc_sepia = '%';
 
 // BLEND MODE CONSTANTS
+const bm_normal = '';
 const bm_xor = 'xor';
+const bm_src_in = 'source-in';
+const bm_src_out = 'source-out';
+const bm_src_atop = 'source-atop';
+const bm_src_over = 'source-over';
+const bm_dest_in = 'destination-in';
+const bm_dest_out = 'destination-out';
+const bm_dest_atop = 'destination-atop';
+const bm_dest_over = 'destination-over';
+const bm_add = 'lighter';
+const bm_copy = 'copy';
 
 // COLOR CONSTANTS
 const c_red = rgb(255, 0, 0);
@@ -1124,6 +1135,12 @@ function rgb(r, g, b)
     g = Math.floor(g);
     b = Math.floor(b);
     return ["rgb(",r,",",g,",",b,")"].join("");
+}
+
+// Set the drawing blend mode
+function draw_set_blend_mode(blendMode)
+{
+    surfaceTarget.globalCompositeOperation = blendMode;
 }
 
 // Set the color of the shadow

@@ -80,7 +80,7 @@ tileLayerCount = 1; // We want to have a capped number of tile layers
 tileSizeDefault = 32; // Default tile size
 
 // GLOBAL VARIABLES
-global = noone; // The global instance
+control = noone; // The global instance
 room_speed = 30;
 room_width = 1024;
 room_height = 768;
@@ -263,10 +263,10 @@ function gameStart()
         }
     }
 
-    global = instance_create(0, 0, globalObj);
+    control = instance_create(0, 0, globalObj);
 }
 
-function skinColor()
+function randomSkinColor()
 {
     var col = '#FFFFFF';
     switch (irandom(3))

@@ -106,7 +106,80 @@ time_current = new Date().getTime();
 
 function gameRestart()
 {
-	gameStart(640, 480);
+    gameStart(640, 480);
+    var block = object_add();
+var player = object_add();
+
+block.width = 32;
+block.height = 32;
+player.width = 32;
+player.height = 32;
+
+player.loop = function()
+{
+    this.friction = 0.2;
+    if(keyboard_check(KEY.LEFT))
+    {
+        if(!this.place_meeting(this.x - 1, this.y, block))
+        {
+            this.hspeed = -4;
+        }
+    }
+    if(keyboard_check(KEY.RIGHT))
+    {
+        if(!this.place_meeting(this.x + 1, this.y, block))
+        {
+            this.hspeed = 4;
+        }
+    }
+    if(keyboard_check(KEY.UP))
+    {
+        if(!this.place_meeting(this.x, this.y - 1, block))
+        {
+            this.vspeed = -4;
+        }
+    }
+    if(keyboard_check(KEY.DOWN))
+    {
+        if(!this.place_meeting(this.x, this.y + 1, block))
+        {
+            this.vspeed = 4;
+        }
+    }
+
+    this.jump_outside(1, block);
+
+    view_center_position(this.x, this.y, 8);
+}
+
+player.draw = function()
+{
+    draw_set_color(c_red);
+    draw_rectangle(this.bbox_left, this.bbox_top, this.bbox_right, this.bbox_bottom, true);
+    draw_set_color(c_white);
+}
+
+block.draw = function()
+{
+    draw_set_color(c_green);
+    draw_rectangle(this.bbox_left, this.bbox_top, this.bbox_right, this.bbox_bottom, true);
+    draw_set_color(c_white);
+}
+
+
+
+for(var i = 0; i < room_width; i += 32)
+{
+    for(var j = 0; j < room_height; j += 32)
+    {
+        if(i == 0 || j == 0 || i == room_width - 32 || j == room_height - 32)
+        {
+            instance_create(i, j, block);
+        }
+    }
+}
+
+instance_create(128, 128, player);
 }
 
 function gameRestartEval()

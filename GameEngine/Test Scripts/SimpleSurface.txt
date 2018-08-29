@@ -19,6 +19,7 @@ o.loop = function()
 
 o.draw = function()
 {
+    draw_line(0, 0, 500, 500);
     surface_draw(this.s, view_xview, view_yview);
 }
 

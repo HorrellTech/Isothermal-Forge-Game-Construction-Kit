@@ -780,7 +780,7 @@ function gameObject(x, y, width, height)
     }
 
     // Check if the mouse is within the instances bounds
-    this.mouse_hover = function()
+    this.mouse_over = function()
     {
         return (mouse_x > this.x && mouse_y > this.y && mouse_x < this.x + this.width && mouse_y < this.y + this.height);
     }
@@ -2156,7 +2156,7 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 //#newfile PlayerInput
 
 keys = []; // Keyboard keys
-mouseDown = false;
+mouse_button = [];
 mb_left = 0;
 mb_right = 2;
 mb_middle = 1;
@@ -2179,10 +2179,16 @@ document.body.addEventListener('mousemove', function(e)
     my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
 });
 
-document.body.addEventListener('click', function(e) 
+document.body.addEventListener('mousedown', function(e) 
 {
     //e.preventDefault();    
+    mouse_button[e.button] = true;
+});
 
+document.body.addEventListener('mouseup', function(e) 
+{
+    //e.preventDefault();    
+    mouse_button[e.button] = false;
 });
 
 // PLAYER INPUT
@@ -2191,6 +2197,11 @@ function keyboard_check(key)
     var v = keys[key];
     
     return (v);
+}
+
+function mouse_check_button(button)
+{
+    return(mouse_button[button]);
 }
 
 // KEYBOARD KEYS

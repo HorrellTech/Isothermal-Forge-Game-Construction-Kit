@@ -2175,8 +2175,16 @@ document.body.addEventListener('keyup', function(e)
 document.body.addEventListener('mousemove', function(e)
 {
     var el = document.getElementById('canvasdiv');
-    mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
-    my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
+    if(el != null)
+    {
+        mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
+        my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
+    }
+    else
+    {
+        mx = e.x - game.canvas.offsetLeft;// - document.scrollLeft;
+        my = e.y - game.canvas.offsetTop;
+    }
 });
 
 document.body.addEventListener('mousedown', function(e) 

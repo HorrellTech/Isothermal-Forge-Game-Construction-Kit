@@ -1,8 +1,6 @@
 // CONSTANTS
 const canvasId = 'canvas';
 const pi = Math.PI; // PI
-const t = 1; // True
-const f = 0; // False
 const self = -1; // The instance which is executing the current block of code
 const other = -2; // The other instance involved in a collision event, or the other instance from a with function
 const all = -3; // All instances currently active in the room
@@ -102,7 +100,7 @@ object_count = 0;
 delta_time = 0;
 time_scale = 1.0; // The time scale can be used for slow motion or game pausing
 time_current = new Date().getTime();
-
+prevent_default_handler = false; // Prevent key or mouse events from interacting with the website and contain only inside canvas
 
 function gameRestart()
 {
@@ -216,6 +214,12 @@ function gameStart()
     cancelAnimationFrame(animationFrame);
     surfaceTarget = context;
     gameObjects = [];
+    /*for(var i = 0; i < 256; i += 1)
+    {
+        key_down[i] = false;
+        key_pressed[i] = false;
+        key_released[i] = false;
+    }*/
 
     surfaceTarget = noone;
     for(var i = 0; i < surfaces.length; i += 1)
@@ -1175,6 +1179,26 @@ function updateGameArea()
         view_angle % 360;
         sortObjectsByDepth();
 
+        for(var i = 0; i < key_pressed.length; i += 1)
+        {
+            key_pressed[i] = false;
+        }
+
+        for(var i = 0; i < key_released.length; i += 1)
+        {
+            key_released[i] = false;
+        }
+
+        for(var i = 0; i < mouse_pressed.length; i += 1)
+        {
+            mouse_pressed[i] = false;
+        }
+
+        for(var i = 0; i < mouse_released.length; i += 1)
+        {
+            mouse_released[i] = false;
+        }
+
         animationFrame = requestAnimationFrame(updateGameArea);
 }
 
@@ -1775,13 +1799,13 @@ function string_replace_all(str, find, replace)
 }
 
 // Returns a value to a string
-function string_to(val)
+function to_string(val)
 {
     return (val.toString());
 }
 
 // Converts a string to an integer
-function int_to(val)
+function to_int(val)
 {
     return (parseInt(val));
 }
@@ -2155,8 +2179,11 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 
 //#newfile PlayerInput
 
-keys = []; // Keyboard keys
-mouse_button = [];
+var mouse_down = [], mouse_pressed = [], mouse_released = [], 
+temp_mouse_pressed = [], temp_mouse_released = []
+key_down = [], key_pressed = [], key_released = [], 
+temp_key_pressed = [], temp_key_released = []
+touch_x = [], touch_y = [], touch_count = 0;
 mb_left = 0;
 mb_right = 2;
 mb_middle = 1;
@@ -2164,12 +2191,28 @@ mb_middle = 1;
 // Input events
 document.body.addEventListener('keydown', function(e) 
 {
-    keys[e.keyCode] = true;
+    if (!key_down[e.keyCode]) {
+		key_pressed[e.keyCode] = true;
+	}
+    key_down[e.keyCode] = true;
+
+    if(prevent_default_handler)
+    {
+        e.preventDefault();
+    }
 });
- 
+
 document.body.addEventListener('keyup', function(e) 
 {
-    keys[e.keyCode] = false;
+    if (key_down[e.keyCode]) {
+		key_released[e.keyCode] = true;
+	}
+    key_down[e.keyCode] = false;
+
+    if(prevent_default_handler)
+    {
+        e.preventDefault();
+    }
 });
 
 document.body.addEventListener('mousemove', function(e)
@@ -2189,47 +2232,80 @@ document.body.addEventListener('mousemove', function(e)
 
 document.body.addEventListener('mousedown', function(e) 
 {
-    //e.preventDefault();    
-    mouse_button[e.button] = true;
+    if (!mouse_down[e.button]) {
+		mouse_pressed[e.button] = true;
+	}
+    mouse_down[e.button] = true;
+
+    if(prevent_default_handler)
+    {
+        e.preventDefault();
+    }
 });
 
 document.body.addEventListener('mouseup', function(e) 
-{
-    //e.preventDefault();    
-    mouse_button[e.button] = false;
+{  
+    if (mouse_down[e.button]) {
+		mouse_released[e.button] = true;
+	}
+    mouse_down[e.button] = false;
+
+    if(prevent_default_handler)
+    {
+        e.preventDefault();
+    }
 });
 
 // PLAYER INPUT
 function keyboard_check(key)
 {
-    var v = keys[key];
+    var v = key_down[key];
+    
+    return (v);
+}
+
+// PLAYER INPUT
+function keyboard_check_pressed(key)
+{
+    var v = key_pressed[key];
+    
+    return (v);
+}
+
+// PLAYER INPUT
+function keyboard_check_released(key)
+{
+    var v = key_released[key];
     
     return (v);
 }
 
 function mouse_check_button(button)
 {
-    return(mouse_button[button]);
+    return (mouse_down[button]);
+}
+
+function mouse_check_button_pressed(button)
+{
+    return (mouse_pressed[button]);
+}
+
+function mouse_check_button_released(button)
+{
+    return (mouse_released[button]);
 }
 
 // KEYBOARD KEYS
-var KEY = {
-    BACKSPACE: 8,
-    TAB:       9,
-    RETURN:   13,
-    ESC:      27,
-    SPACE:    32,
-    PAGEUP:   33,
-    PAGEDOWN: 34,
-    END:      35,
-    HOME:     36,
-    LEFT:     37,
-    UP:       38,
-    RIGHT:    39,
-    DOWN:     40,
-    INSERT:   45,
-    DELETE:   46,
-    ZERO:     48, ONE: 49, TWO: 50, THREE: 51, FOUR: 52, FIVE: 53, SIX: 54, SEVEN: 55, EIGHT: 56, NINE: 57,
-    A:        65, B: 66, C: 67, D: 68, E: 69, F: 70, G: 71, H: 72, I: 73, J: 74, K: 75, L: 76, M: 77, N: 78, O: 79, P: 80, Q: 81, R: 82, S: 83, T: 84, U: 85, V: 86, W: 87, X: 88, Y: 89, Z: 90,
-    TILDA:    192
-  };
+var vk_0 = 48, vk_1 = 49, vk_2 = 50, vk_3 = 51, vk_4 = 52, vk_5 = 53, vk_6 = 54,
+	vk_7 = 55, vk_8 = 56, vk_9 = 57, vk_a = 65, vk_add = 107, vk_alt = 18, vk_b = 66,
+	vk_backspace = 8, vk_c = 67, vk_ctrl = 17, vk_d = 68, vk_decimal = 110, vk_delete = 46,
+	vk_divide = 111, vk_down = 40, vk_e = 69, vk_end = 35, vk_enter = 13, vk_escape = 27,
+	vk_f1 = 112, vk_f2 = 113, vk_f3 = 114, vk_f4 = 115, vk_f5 = 116, vk_f6 = 117,
+	vk_f7 = 118, vk_f8 = 119, vk_f9 = 120, vk_f10 = 121, vk_f11 = 122, vk_f12 = 123,
+	vk_g = 71, vk_h = 72, vk_home = 36, vk_f = 70, vk_i = 73, vk_insert = 45, vk_j = 74, vk_k = 75,
+	vk_l = 76, vk_left = 37, vk_m = 77, vk_multiply = 106, vk_n = 78, vk_num0 = 96, vk_num1 = 97,
+	vk_num2 = 98, vk_num3 = 99, vk_num4 = 100, vk_num5 = 101, vk_num6 = 102, vk_num7 = 103,
+	vk_num8 = 104, vk_num9 = 105, vk_o = 79, vk_p = 80, vk_pagedown = 34, vk_pageup = 33,
+	vk_pause = 19, vk_q = 81, vk_r = 82, vk_right = 39, vk_s = 83, vk_shift = 16, vk_space = 32,
+	vk_subtract = 109, vk_t = 84, vk_tab = 9, vk_u = 85, vk_up = 38, vk_v = 86, vk_w = 87,
+	vk_x = 88, vk_y = 89, vk_z = 90;

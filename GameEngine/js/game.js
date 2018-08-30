@@ -171,8 +171,6 @@ function gameRestart()
 		draw_set_color(c_white);
 	}
 
-
-
 	for(var i = 0; i < room_width; i += 32)
 	{
 		for(var j = 0; j < room_height; j += 32)
@@ -185,6 +183,13 @@ function gameRestart()
 	}
 
 	instance_create(128, 128, player);
+}
+
+// Restart the app with code input
+function gameRestartCode(c)
+{
+	gameStart();
+    execute_string(c);
 }
 
 function gameRestartEval()
@@ -2151,6 +2156,10 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 //#newfile PlayerInput
 
 keys = []; // Keyboard keys
+mouseDown = false;
+mb_left = 0;
+mb_right = 2;
+mb_middle = 1;
 
 // Input events
 document.body.addEventListener('keydown', function(e) 
@@ -2168,6 +2177,12 @@ document.body.addEventListener('mousemove', function(e)
     var el = document.getElementById('canvasdiv');
     mx = e.x - el.offsetLeft - game.canvas.offsetLeft;// - document.scrollLeft;
     my = e.y - el.offsetTop - game.canvas.offsetTop;// - document.scrollTop;
+});
+
+document.body.addEventListener('click', function(e) 
+{
+    //e.preventDefault();    
+
 });
 
 // PLAYER INPUT

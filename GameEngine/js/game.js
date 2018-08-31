@@ -62,6 +62,7 @@ const a_75 = 0.75; // Alpha 3/4
 
 // HIDDEN GLOBAL VARIABLES
 gameObjects = []; // The game object list
+sprites = []; // Hold a list of sprites
 surfaces = []; // List holding the surfaces in the game
 surfaceTarget = noone; // The current target surface
 context = null;
@@ -101,6 +102,7 @@ delta_time = 0;
 time_scale = 1.0; // The time scale can be used for slow motion or game pausing
 time_current = new Date().getTime();
 prevent_default_handler = false; // Prevent key or mouse events from interacting with the website and contain only inside canvas
+fullscreen_aspect_ratio = false; // If the canvas size should match the window
 
 function gameRestart()
 {
@@ -197,6 +199,47 @@ function gameRestartEval()
     execute_string(c);
 }
 
+// Set the game to match the window size
+window.addEventListener(
+    'load',
+    function () {
+        var canvas = document.getElementsByTagName('canvas')[0];
+
+        fullscreenify(canvas);
+    },
+    false
+);
+
+
+function fullscreenify() 
+{
+    var canvas = game.canvas;
+    var style = canvas.getAttribute('style') || '';
+    
+    window.addEventListener('resize', function () {resize(canvas);}, false);
+
+    resize(canvas);
+
+    function resize(canvas) {
+        if(fullscreen_aspect_ratio)
+        {
+            var scale = {x: 1, y: 1};
+            scale.x = (window.innerWidth - 10) / canvas.width;
+            scale.y = (window.innerHeight - 10) / canvas.height;
+            
+            if (scale.x < 1 || scale.y < 1) {
+                scale = '1, 1';
+            } else if (scale.x < scale.y) {
+                scale = scale.x + ', ' + scale.x;
+            } else {
+                scale = scale.y + ', ' + scale.y;
+            }
+            
+            canvas.setAttribute('style', style + ' ' + '-ms-transform-origin: center top; -webkit-transform-origin: center top; -moz-transform-origin: center top; -o-transform-origin: center top; transform-origin: center top; -ms-transform: scale(' + scale + '); -webkit-transform: scale3d(' + scale + ', 1); -moz-transform: scale(' + scale + '); -o-transform: scale(' + scale + '); transform: scale(' + scale + ');');
+        }
+    }
+}
+
 // Scale the canvas relative to it's current size (1 = normal)
 function scaleCanvas(xscale, yscale)
 {
@@ -235,6 +278,7 @@ function gameStart()
     view_wview = 640;
     view_hview = 480;
     time_scale = 1.0;
+    background_color = c_ltgray;
 
     // Initialize the tile layers
     /*for(var i = 0; i < tileLayerCount; i += 1)
@@ -442,6 +486,15 @@ function surface_reset_target()
     surfaceTarget = context;
 }
 
+// Create a sprite from the surface
+function sprite_create_from_surface(surface)
+{
+    var img = new Sprite(surface.getSprite(), 0);
+
+    sprites.push(img);
+
+    return (img);
+}
 
 function surface_exists(surface)
 {
@@ -469,10 +522,26 @@ function surface(id, width, height)
         context.drawImage(this.canvas, x, y, width, height);
     }
 
+    this.getSprite = function()
+    {
+        return (this.canvas.toDataURL());
+    }
+
     this.free = function()
     {
         this.canvas = null;
     }
+}
+
+// A sprite object
+function sprite(image, frame_count)
+{
+    this.origin_x = 0;
+    this.origin_y = 0;
+    this.frame_count = frame_count;
+
+    this.image = new Image(image.width, image.height);
+    this.image.src = image;
 }
 
 // Create an new instance of an object
@@ -1030,12 +1099,6 @@ function checkCollision(object1, object2)
             return(false);
         }
     }
-
-// A sprite object
-function sprite(im)
-{
-
-}
 
 // Sort all of the objects based on their top instances depth
 function sortObjectsByDepth()

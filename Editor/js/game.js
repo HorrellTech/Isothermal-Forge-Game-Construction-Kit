@@ -109,9 +109,57 @@ fullscreen_aspect_ratio = false; // If the canvas size should match the window
 function gameRestart()
 {
     gameStart();
-    control.loop = function(){this.debug_mode = false;} // Turn off the debug FPS etc
+    control.loop = function(){ this.debug_mode = false; } // Turn off the debug FPS etc
     background_color = rgb(32, 32, 32);
-    // CREATE A BASIC WINDOW OBJECT
+
+    // CREATE OBJECTS
+    var oWindow = object_add();
+
+    // WINDOW OBJECT
+    oWindow.awake = function()
+    {
+        this.barHeight = 24;
+        this.title = 'Test window';
+        this.width = 200;
+        this.height = 150;
+        this.drag = false;
+        this.dragX = 0;
+        this.dragY = 0;
+
+        this.surface = surface_create(this.width, this.height);
+    }
+
+    oWindow.loop = function()
+    {
+        if(mouse_within(this.bbox_left, this.bbox_top - this.barHeight, this.bbox_right, this.bbox_top))
+        {
+            if(mouse_check_button_pressed(mb_left))
+            {
+                if(!this.drag == true){this.drag = true; this.dragX = mouse_x - this.x; this.dragY = mouse_y - this.y;}
+            }
+        }
+        if(this.drag)
+        {
+            this.x = mouse_x - this.dragX;
+            this.y = mouse_y - this.dragY;
+
+            if(mouse_check_button_released(mb_left))
+            {
+                this.drag = false;
+            }
+        }
+    }
+
+    oWindow.draw = function()
+    {
+        draw_set_color(rgb(64, 64, 64));
+        draw_rectangle(this.bbox_left, this.bbox_top, this.bbox_right, this.bbox_bottom, false);
+        draw_set_color(rgb(96, 96, 96));
+        draw_rectangle(this.bbox_left, this.bbox_top - this.barHeight, this.bbox_right, this.bbox_top, false);
+        draw_set_color(c_white);
+    }
+
+    instance_create(64, 64, oWindow);
 }
 
 // Restart the app with code input
@@ -990,6 +1038,11 @@ function gameObject(x, y, width, height)
 
         return(nearest);
     }
+}
+
+function mouse_within(x1, y1, x2, y2)
+{
+    return (mouse_x > x1 && mouse_y > y1 && mouse_x < x2 && mouse_y < y2);
 }
 
 // Set the view centered to a position with a smootheness value(8 is a good smoothness value)

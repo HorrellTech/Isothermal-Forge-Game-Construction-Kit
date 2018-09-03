@@ -2248,8 +2248,7 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
 
 //#newfile PlayerInput
 
-var mouse_down = [], mouse_pressed = [], mouse_released = [], 
-temp_mouse_pressed = [], temp_mouse_released = []
+var mouse_down = [], mouse_pressed = [], mouse_released = [],
 key_down = [], key_pressed = [], key_released = [], 
 touch_x = [], touch_y = [], touch_count = 0;
 mb_left = 0;

@@ -126,26 +126,31 @@ function gameRestart()
         this.dragX = 0;
         this.dragY = 0;
 
+        this.dock = 1; // 0 = none, 1 = right, 2 = down, 3 = left, 4 = top
+
         this.surface = surface_create(this.width, this.height);
     }
 
     oWindow.loop = function()
     {
-        if(mouse_within(this.bbox_left, this.bbox_top - this.barHeight, this.bbox_right, this.bbox_top))
+        if(this.dock != 0)
         {
-            if(mouse_check_button_pressed(mb_left))
+            if(mouse_within(this.bbox_left, this.bbox_top - this.barHeight, this.bbox_right, this.bbox_top))
             {
-                if(!this.drag == true){this.drag = true; this.dragX = mouse_x - this.x; this.dragY = mouse_y - this.y;}
+                if(mouse_check_button_pressed(mb_left))
+                {
+                    if(!this.drag == true){this.drag = true; this.dragX = mouse_x - this.x; this.dragY = mouse_y - this.y;}
+                }
             }
-        }
-        if(this.drag)
-        {
-            this.x = mouse_x - this.dragX;
-            this.y = mouse_y - this.dragY;
-
-            if(mouse_check_button_released(mb_left))
+            if(this.drag)
             {
-                this.drag = false;
+                this.x = mouse_x - this.dragX;
+                this.y = mouse_y - this.dragY;
+
+                if(mouse_check_button_released(mb_left))
+                {
+                    this.drag = false;
+                }
             }
         }
     }
@@ -637,8 +642,6 @@ function gameObject(x, y, width, height)
             }
 
             this.loop_begin();
-            this.xprevious = this.x;
-            this.yprevious = this.y;
 
             //this.image_index += 1 % this.image_number;
 
@@ -700,6 +703,8 @@ function gameObject(x, y, width, height)
             // Center of the object based on the collision box center
             this.center_x = this.bbox_left + (this.width / 2);
             this.center_y = this.bbox_top + (this.height / 2);
+            this.xprevious = this.x;
+            this.yprevious = this.y;
 
             this.loop_end();
     };
@@ -1083,6 +1088,22 @@ function instance_position(x, y, object)
     return (noone);
 }
 
+// Return the instances(if any) at the position set in an array
+// Should return the list in drawing order
+function instances_position(x, y, object)
+{
+    var arr = [];
+    for(var i = 0; i < object.instances.length; i += 1)
+    {
+        var ins = object.instances[i];
+
+        if(ins.point_inside(x, y))
+        {
+            arr.push(ins);
+        }
+    }
+    return (arr);
+}
 
 function checkCollision(object1, object2)
     {

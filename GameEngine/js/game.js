@@ -588,6 +588,8 @@ function gameObject(x, y, width, height)
     this.bbox_top = 0;
     this.bbox_right = 0;
     this.bbox_bottom = 0;
+    this.center_x = 0;
+    this.center_y = 0;
     this.depth = 0;
     this.width = width;
     this.height = height;
@@ -701,6 +703,10 @@ function gameObject(x, y, width, height)
             this.bbox_top = this.y - this.offset_y;
             this.bbox_right = this.bbox_left + this.width;
             this.bbox_bottom = this.bbox_top + this.height;
+
+            // Center of the object based on the collision box center
+            this.center_x = this.bbox_left + (this.width / 2);
+            this.center_y = this.bbox_top + (this.height / 2);
 
             this.loop_end();
     };

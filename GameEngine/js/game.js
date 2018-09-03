@@ -78,6 +78,8 @@ tileLayersHigh = []; // Keep track of higher tiles
 tileLayerCount = 1; // We want to have a capped number of tile layers
 tileSizeDefault = 32; // Default tile size
 
+images = [];
+
 // GLOBAL VARIABLES
 control = noone; // The global instance
 room_speed = 30;
@@ -192,24 +194,40 @@ function gameRestartCode(c)
     execute_string(c);
 }
 
-function gameRestartEval()
+function gameRestartEval(img)
 {
-	var c = document.getElementById('tbcode').value;
+    var c = document.getElementById('tbcode').value;
+    //images = img;
 	gameStart();
     execute_string(c);
 }
 
-// Set the game to match the window size
-window.addEventListener(
-    'load',
-    function () {
-        var canvas = document.getElementsByTagName('canvas')[0];
+/*window.onload = function() {
+    var sources = {
+        /*resource1: "img/sprite1.png",
+        resource2: "img/sprite2.png",
+        resource3: "img/sprite3.png"
+    };
+    //loadImages(sources, gameRestartEval);  // calls initGame after *all* images have finished loading
+};*/
 
-        fullscreenify(canvas);
-    },
-    false
-);
-
+function loadImages(sources, callback) {
+    var images = {};
+    var loadedImages = 0;
+    var numImages = 0;
+    for (var src in sources) {
+        numImages++;
+    }
+    for (var src in sources) {
+        images[src] = new Image();
+        images[src].onload = function(){
+            if (++loadedImages >= numImages) {
+                callback(images);
+            }
+        };
+        images[src].src = sources[src];
+    }
+}
 
 function fullscreenify() 
 {

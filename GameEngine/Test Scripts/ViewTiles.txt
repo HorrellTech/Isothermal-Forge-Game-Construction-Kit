@@ -1,0 +1,47 @@
+var o = object_add();
+
+o.awake = function()
+{
+    this.grid = create_array(840, 240);
+
+    for(var i = 0; i < 840; i += 1)
+    {
+        for(var j = 0; j < 240; j += 1)
+        {
+            this.grid[i][j] = irandom_range(-1, 4);
+        }
+    }
+}
+
+o.draw = function()
+{
+
+    view_xview += 1;
+    view_yview += 1;
+    for(var i = floor(view_xview / 16); i < ceil((view_xview + view_wview) / 16); i += 1)
+    {
+        for(var j = floor(view_yview / 16); j < ceil((view_yview + view_hview) / 16); j += 1)
+        {
+            switch(this.grid[i][j])
+            {
+                case 1:
+                    draw_set_color(c_blue);
+                    break;                
+                case 2:
+                    draw_set_color(c_green);
+                    break;
+                case 3:
+                    draw_set_color(c_lime);
+                    break;
+            }
+
+            if(this.grid[i][j] > 0)
+            {
+                draw_rectangle(i * 16, j * 16, (i * 16) + 16, (j * 16) + 16, false);
+            }
+            draw_set_color(c_white);
+        }
+    }
+}
+
+instance_create(0, 0, o);

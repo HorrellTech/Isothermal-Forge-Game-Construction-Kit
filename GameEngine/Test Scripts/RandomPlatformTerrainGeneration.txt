@@ -1,18 +1,10 @@
+background_color = rgb(12, 128, 255);
+
 var o = object_add();
 
 o.awake = function()
 {
-    this.grid = [];//create_array(840, 240);
-
-    for(var i = 0; i < 840; i += 1)
-    {
-        for(var j = 0; j < 240; j += 1)
-        {
-            this.grid.push([i, j]);
-            //this.grid[i, j] = irandom_range(-1, 4);
-            this.grid[i][j] = 0; //irandom_range(-1, 4);
-        }
-    }
+    this.grid = array_create_2d(840, 240, 0);
 
     // Generate
     var xx, yy;
@@ -22,9 +14,14 @@ o.awake = function()
     {
         this.grid[xx][yy] = 1;        
 
+        var sheight = irandom_range(2, 6);
         for(var i = yy + 1; i < 240 - yy; i += 1)
         {
-            this.grid[xx][i] = irandom_range(2, 4);
+            this.grid[xx][i] = 2;
+            if(i > yy + 1 + sheight)
+            {
+                this.grid[xx][i] = 3;
+            }
         }
 
         yy += irandom_range(-1, 2);
@@ -42,13 +39,13 @@ o.draw = function()
             switch(this.grid[i][j])
             {
                 case 1:
-                    draw_set_color(c_blue);
+                    draw_set_color(c_green);
                     break;                
                 case 2:
-                    draw_set_color(c_green);
+                    draw_set_color(rgb(64, 94, 12));
                     break;
                 case 3:
-                    draw_set_color(c_lime);
+                    draw_set_color(c_gray);
                     break;
             }
 
@@ -58,6 +55,26 @@ o.draw = function()
             }
             draw_set_color(c_white);
         }
+    }
+
+    if(mouse_check_button(mb_right))
+    {
+        var xx, yy;
+        xx = floor(mouse_x / 32);
+        yy = floor(mouse_y / 32);
+        this.grid[xx][yy] = 0;
+    }
+    if(mouse_check_button(mb_left))
+    {
+        var xx, yy;
+        xx = floor(mouse_x / 32);
+        yy = floor(mouse_y / 32);
+        this.grid[xx][yy] = 2;
+    }
+
+    if(ceil((view_xview + view_wview) / 32) > 840)
+    {
+        view_xview = 0;
     }
 }
 

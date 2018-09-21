@@ -337,6 +337,22 @@ function gameStart()
     control = instance_create(0, 0, globalObj);
 }
 
+function debug_off()
+{
+    control.loop = function()
+    {
+        this.debug_mode = false;
+    }
+}
+
+function debug_on()
+{
+    control.loop = function()
+    {
+        this.debug_mode = true;
+    }
+}
+
 function randomSkinColor()
 {
     var col = '#FFFFFF';
@@ -1722,6 +1738,32 @@ function ray_info()
 //#newfile MathHelper
 
 // ARRAY STUFF
+
+// Create a new list
+function list_create()
+{
+    var arr = [];
+
+    return(arr);
+}
+
+// Add to the list
+function list_add(id, value)
+{
+    id.push(value);
+}
+
+// Set an item to a certain value in the list
+function list_set(id, pos, value)
+{
+    id[pos] = value;
+}
+
+// Get the value of an item in the list
+function list_get(id, pos)
+{
+    return(id[pos]);
+}
 
 // Create and initialize a 2d array
 function array2d_create(width, height, defaultValue)

@@ -4,7 +4,7 @@ var o = object_add();
 
 o.awake = function()
 {
-    this.grid = array_create_2d(840, 240, 0);
+    this.grid = array2d_create(840, 240, 0);
 
     // Generate
     var xx, yy;
@@ -12,15 +12,16 @@ o.awake = function()
           
     for(xx = 0; xx < 840; xx += 1)
     {
-        this.grid[xx][yy] = 1;        
+        //this.grid[xx][yy] = 1;     
+        array2d_set(this.grid, xx, yy, 1);   
 
         var sheight = irandom_range(2, 6);
         for(var i = yy + 1; i < 240 - yy; i += 1)
         {
-            this.grid[xx][i] = 2;
+            array2d_set(this.grid, xx, i, 2);
             if(i > yy + 1 + sheight)
             {
-                this.grid[xx][i] = 3;
+                array2d_set(this.grid, xx, i, 3); 
             }
         }
 
@@ -36,7 +37,7 @@ o.draw = function()
     {
         for(var j = floor(view_yview / 32); j < ceil((view_yview + view_hview) / 32); j += 1)
         {
-            switch(this.grid[i][j])
+            switch(array2d_get(this.grid, i, j))
             {
                 case 1:
                     draw_set_color(c_green);
@@ -49,7 +50,7 @@ o.draw = function()
                     break;
             }
 
-            if(this.grid[i][j] > 0)
+            if(array2d_get(this.grid, i, j) > 0)
             {
                 draw_rectangle(i * 32, j * 32, (i * 32) + 32, (j * 32) + 32, false);
             }
@@ -62,14 +63,14 @@ o.draw = function()
         var xx, yy;
         xx = floor(mouse_x / 32);
         yy = floor(mouse_y / 32);
-        this.grid[xx][yy] = 0;
+        array2d_set(this.grid, xx, yy, 0);
     }
     if(mouse_check_button(mb_left))
     {
         var xx, yy;
         xx = floor(mouse_x / 32);
         yy = floor(mouse_y / 32);
-        this.grid[xx][yy] = 2;
+        array2d_set(this.grid, xx, yy, 2);
     }
 
     if(ceil((view_xview + view_wview) / 32) > 840)

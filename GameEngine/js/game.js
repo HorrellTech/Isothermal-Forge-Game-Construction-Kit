@@ -1674,8 +1674,6 @@ function ray_cast(id, x, y, stepSize, length, direction, object)
             ob = instance_position(xx, yy, object);
         }
 
-        
-        
         if(ob != noone)
         {
             info.hit_instance = ob;
@@ -1723,10 +1721,10 @@ function ray_info()
 
 //#newfile MathHelper
 
-// MATH STUFF
+// ARRAY STUFF
 
-// Create an array
-function array_create_2d(width, height, defaultValue) 
+// Create and initialize a 2d array
+function array2d_create(width, height, defaultValue)
 {
     var arr = [];
 
@@ -1739,8 +1737,62 @@ function array_create_2d(width, height, defaultValue)
         }
     }
 
-    return arr;
+    return(arr);
 }
+
+// Set the value of the 2d array
+function array2d_set(array, x, y, value)
+{
+    array[x][y] = value;
+}
+
+// Get the value of the 2d array
+function array2d_get(array, x, y)
+{
+    return(array[x][y]);
+}
+
+// Create and initialize a 2d array
+function array3d_create(width, height, depth, defaultValue)
+{
+    var arr = [];
+
+    for(var i = 0; i < width; i += 1)
+    {
+        for(var j = 0; j < height; j += 1)
+        {
+            for(var f = 0; f < depth; f += 1)
+            {
+                arr.push([i, j, f]);
+                arr[i][j][f] = defaultValue;
+            }
+        }
+    }
+
+    return(arr);
+}
+
+// Set the value of the 2d array
+function array3d_set(array, x, y, z, value)
+{
+    array[x][y][z] = value;
+}
+
+// Get the value of the 2d array
+function array3d_get(array, x, y, z)
+{
+    return(array[x][y][z]);
+}
+
+// Clear the array
+function array_clear(array)
+{
+    array = [];
+
+    return(array);
+}
+
+// MATH STUFF
 
 // Returns the greatest integer less than or equal to its numeric argument
 function floor(x)

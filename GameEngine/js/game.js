@@ -982,6 +982,24 @@ function gameObject(x, y, width, height)
     }
 
     // Return if there is a collision with an instance
+    this.gridworld_place_meeting = function(x, y, id)
+    {
+        var xOld, yOld, ret;
+        ret = false;
+        xOld = this.x;
+        yOld = this.y;
+
+        this.x = x;
+        this.y = y;
+
+
+        this.x = xOld;
+        this.y = yOld;
+
+        return (ret);
+    }
+
+    // Return if there is a collision with an instance
     this.place_meeting = function(x, y, object)
     {
         var xOld, yOld, ret;
@@ -1166,6 +1184,90 @@ function sortObjectsByDepth()
             }
         }
     }
+}
+
+/// 2D GRID BASED WORLD
+
+// Create a new grid world
+function gridworld_create(width, height, blockSize, defaultBlockType)
+{
+    this.width = width;
+    this.height = height;
+    this.block_size = blockSize;
+
+    this.grid = array2d_create(width, height, defaultBlockType);
+
+    this.block_type = list_create(); // Create a list for the value of each block type
+
+    // Draw to the grid based on the view position and size
+    this.draw = function()
+    {
+        for(var i = floor(view_xview / this.block_size); i < ceil((view_xview + view_wview) / this.block_size); i += 1)
+        {
+            for(var j = floor(view_yview / this.block_size); j < ceil((view_yview + view_hview) / this.block_size); j += 1)
+            {
+                /*if(list_get(this.block_type, array2d_get(this.grid, i, j)) != null)
+                {
+                    var ob = list_get(this.block_type, array2d_get(this.grid, i, j));
+                    ob.x = i * this.block_size;
+                    ob.y = j * this.block_size;
+                    ob.draw(ob.x, ob.y);
+                }*/
+            }
+        }
+    }
+
+    return (this);
+}
+
+// Add a block type to the grid world. drawFunction NEEDS x and y as its input
+function gridworld_add_block_type(id, drawFunction)
+{
+    list_add(id.block_type, this);
+    this.x = 0;
+    this.y = 0;
+
+    this.draw = function(x, y)
+    {
+        drawFunction(x, y);
+    }
+
+    return(this);
+}
+
+function gridworld_draw(id)
+{
+    id.draw();
+}
+
+// Get the width of the grid world
+function gridworld_get_width(id)
+{
+    return (id.width);
+}
+
+// Get the height of the grid world
+function gridworld_get_height(id)
+{
+    return (id.height);
+}
+
+// Get the block size in the grid world
+function gridworld_get_block_size(id)
+{
+    return (id.block_size);
+}
+
+// Get the world position of the relative grid position
+function gridworld_grid_to_world(id, gridCell)
+{
+    return(floor(gridCell * id.block_size));
+}
+
+// Get the relative grid position of the given world position
+function gridworld_world_to_grid(id, worldPosition)
+{
+    return(floor(worldPosition / id.block_size));
 }
 
 // Check if one of the objects has sorted by depth

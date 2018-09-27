@@ -51,7 +51,7 @@ o.draw = function()
 
             if(array2d_get(this.grid, i, j) > 0)
             {
-                draw_rectangle(i * 32, j * 32, (i * 32) + 32, (j * 32) + 32, false);
+                f3d_draw_cube(i * 32, j * 32, (i * 32) + 32, (j * 32) + 32, 0, 32, true);
             }
             draw_set_color(c_white);
         }

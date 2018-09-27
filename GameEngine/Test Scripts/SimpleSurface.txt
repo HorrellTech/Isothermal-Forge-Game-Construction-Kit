@@ -10,9 +10,9 @@ o.awake = function()
 o.loop = function()
 {
     surface_set_target(this.s);
-        draw_clear_alpha(c_black, 0.9);
-        draw_set_blend_mode(bm_dest_out);
-        draw_circle_color(mouse_x, mouse_y, 64, c_white, c_black, false);
+        draw_clear_alpha(c_black, 0.5);
+        draw_set_blend_mode(bm_xor);
+        draw_circle_color(mouse_x, mouse_y, pulse_positive(64, 128), c_red, c_black, false);
         draw_set_blend_mode(bm_normal);
     surface_reset_target();
 }

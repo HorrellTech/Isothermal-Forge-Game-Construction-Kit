@@ -120,11 +120,15 @@ function gameRestart()
     {
         this.barHeight = 24;
         this.title = 'Test window';
+        this.focus = true;
         this.width = 200;
         this.height = 150;
         this.drag = false;
+        this.resize = false;
         this.dragX = 0;
         this.dragY = 0;
+        this.resizeX = 0;
+        this.resizeY = 0;
 
         this.dock = 1; // 0 = none, 1 = right, 2 = down, 3 = left, 4 = top
 
@@ -142,6 +146,14 @@ function gameRestart()
                     if(!this.drag == true){this.drag = true; this.dragX = mouse_x - this.x; this.dragY = mouse_y - this.y;}
                 }
             }
+            if(mouse_within(this.bbox_right - 8, this.bbox_bottom - 8, this.bbox_right, this.bbox_bottom))
+            {
+                if(mouse_check_button_pressed(mb_left))
+                {
+                    if(!this.resize == true){this.resize = true; this.resizeX = mouse_x - this.x; this.resizeY = mouse_y - this.y;}
+                }
+            }
+
             if(this.drag)
             {
                 this.x = mouse_x - this.dragX;
@@ -152,6 +164,27 @@ function gameRestart()
                     this.drag = false;
                 }
             }
+            if(this.resize)
+            {
+                this.width = mouse_x - this.x;
+                this.height = mouse_y - this.y;
+
+                if(mouse_check_button_released(mb_left))
+                {
+                    this.resize = false;
+                }
+            }
+
+            // Limit the minimum size
+            this.width = clamp(this.width, 64, 9000);
+            this.height = clamp(this.height, 64, 9000);
+        }
+        else
+        {
+            this.x = view_xview;
+            this.x = this.view_yview + this.barHeight;
+            this.width = view_wview;
+            this.height = view_hview;
         }
     }
 
@@ -161,6 +194,16 @@ function gameRestart()
         draw_rectangle(this.bbox_left, this.bbox_top, this.bbox_right, this.bbox_bottom, false);
         draw_set_color(rgb(96, 96, 96));
         draw_rectangle(this.bbox_left, this.bbox_top - this.barHeight, this.bbox_right, this.bbox_top, false);
+        if(this.focus)
+        {
+            draw_set_color(c_white);
+        }
+        else
+        {
+            draw_set_color(c_dkgray);
+        }
+        draw_set_font(18, "Times New Roman");
+        draw_text(this.bbox_left + 4, this.bbox_top - this.barHeight, this.title);
         draw_set_color(c_white);
     }
 

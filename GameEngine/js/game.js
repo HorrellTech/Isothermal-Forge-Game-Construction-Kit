@@ -2485,6 +2485,8 @@ function f3d_draw_test_cube(x1, y1, x2, y2, z, height, outline)
     f3d_draw_floor(x1, y1, x2, y2, z + height, outline);
 }
 
+//#newfile 3D
+
 //#newfile PlayerInput
 
 var mouse_down = [], mouse_pressed = [], mouse_released = [],
